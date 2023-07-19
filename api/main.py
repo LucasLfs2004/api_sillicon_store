@@ -1,13 +1,10 @@
 import uuid
 import mysql.connector
-
+import bcrypt
 from datetime import date
-
 from typing import Union
 from pydantic import BaseModel
-
 from fastapi import FastAPI, HTTPException
-
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -53,14 +50,33 @@ def get_persons():
     person = cursor.fetchall()
     cursor.close()
     return person
+
+
+class effectLogin(BaseModel):
+    email: str
+    senha: str
+
+@app.post("/login")
+def effect_login(login: effectLogin):
+    cursor = mysql_connection.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM PERSON WHERE EMAIL LIKE %s", (login.email))
+    person = cursor.fetchall()
+    cursor.close
+    if bcrypt.checkpw(login.senha.encode("utf-8"), person.senha):
+        return person;
+    else: 
+        return "Login inválido!"
+
+
 class NewAccount(BaseModel):
-    nome: str
+    name: str
     uuid: int
     cpf: str
     email: str
-    nascimento: date
-    telefone: str
-    senha: str
+    birth: date
+    phone: str
+    password: str
+
 
 # Rota para adicionar um novo usuário
 @app.post("/api/create-account")
@@ -68,7 +84,9 @@ def create_account(account: NewAccount):
     try:
         # Conectar ao banco de dados
         cursor = mysql_connection.cursor(dictionary=True)
-
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(account.password.encode("utf-8"), salt)
+        account.password = hashed_password
         uuid_int = int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
         account.uuid = int(uuid_int)
 
@@ -76,7 +94,7 @@ def create_account(account: NewAccount):
 
         cursor.execute(
             "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, NASCIMENTO, TELEFONE, SENHA) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (account.uuid, account.nome, account.cpf, account.email, account.nascimento, account.telefone, account.senha)
+            (account.uuid, account.name, account.cpf, account.email, account.birth, account.phone, account.password)
         )
         mysql_connection.commit()
 
