@@ -1,6 +1,10 @@
 import uuid
 import mysql.connector
 import bcrypt
+import jwt
+import secrets
+import datetime
+from typing import Optional
 from datetime import date
 from typing import Union
 from pydantic import BaseModel
@@ -33,6 +37,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+SECRET_KEY = secrets.token_hex(32)
+
+def generate_jwt_token(payload):
+    # Defina o tempo de expiração do token, por exemplo, 1 hora a partir do momento atual.
+    expiration = datetime.datetime.utcnow() + datetime.timedelta(hours=240)
+    
+    # Crie o payload do token com os dados do usuário
+    token_payload = {
+        'exp': expiration,
+        **payload  # Aqui você pode adicionar outras informações sobre o usuário, como ID, nome, etc.
+    }
+    
+    # Gere o token utilizando a função jwt.encode()
+    token = jwt.encode(token_payload, SECRET_KEY, algorithm='HS256')
+    
+    return token
+
 
 @app.get("/")
 def read_root():
@@ -58,19 +79,28 @@ class effectLogin(BaseModel):
 
 @app.post("/login")
 def effect_login(login: effectLogin):
-    cursor = mysql_connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM PERSON WHERE EMAIL LIKE %s", (login.email))
-    person = cursor.fetchall()
-    cursor.close
-    if bcrypt.checkpw(login.senha.encode("utf-8"), person.senha):
-        return person;
-    else: 
-        return "Login inválido!"
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM PERSON WHERE EMAIL LIKE %s", (login.email,))
+        person = cursor.fetchone()
+        cursor.close
 
+        if person is None:
+            raise HTTPException(status_code=401, detail="Usuário não encontrado")
+
+        if bcrypt.checkpw(login.senha.encode("utf-8"), person["SENHA"].encode("utf-8")):
+            print("Eu entro aqui!")
+            token = generate_jwt_token({'user_id': person["ID"]})
+            return {"message": "Login efetuado com sucesso", "user_data": person, "user_token": token}
+        else: 
+            raise HTTPException(status_code=401, detail="Senha incorreta")
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 class NewAccount(BaseModel):
     name: str
-    uuid: int
+    uuid: Optional[int] = None
     cpf: str
     email: str
     birth: date
@@ -79,7 +109,7 @@ class NewAccount(BaseModel):
 
 
 # Rota para adicionar um novo usuário
-@app.post("/api/create-account")
+@app.post("/create-account")
 def create_account(account: NewAccount):
     try:
         # Conectar ao banco de dados
@@ -88,17 +118,19 @@ def create_account(account: NewAccount):
         hashed_password = bcrypt.hashpw(account.password.encode("utf-8"), salt)
         account.password = hashed_password
         uuid_int = int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
-        account.uuid = int(uuid_int)
+        account.uuid = uuid_int
+        print(account.uuid)
 
         # Executar a inserção na tabela produtos
 
+        print("tentando...")
         cursor.execute(
             "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, NASCIMENTO, TELEFONE, SENHA) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             (account.uuid, account.name, account.cpf, account.email, account.birth, account.phone, account.password)
         )
         mysql_connection.commit()
 
-                # Realizar consulta para obter os dados inseridos
+        # Realizar consulta para obter os dados inseridos
         cursor.execute("SELECT * FROM PERSON WHERE ID = %s", (account.uuid,))
         inserted_data = cursor.fetchone()
 

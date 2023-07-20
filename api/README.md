@@ -5,7 +5,7 @@
 ### flask
 ### flask-mysql
 ### mysql-connector-python
-### 
+### pyjwt
 ### 
 ### 
 ### 
