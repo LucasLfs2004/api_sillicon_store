@@ -8,11 +8,18 @@ from typing import Optional
 from datetime import date
 from typing import Union
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import PlainTextResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+import calendar
+import time
+
 
 app = FastAPI()
-
 
 mysql_host = "127.0.0.1://3306/sillicon_store"
 mysql_user = "admin"
@@ -27,6 +34,7 @@ mysql_connection = mysql.connector.connect(
 
 origins = [
     "http://localhost:3000",  # Adicione a URL do seu aplicativo ReactJS aqui
+    "http://localhost:3001",  # Adicione a URL do seu aplicativo ReactJS aqui
 ]
 
 app.add_middleware(
@@ -37,6 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+current_GMT = time.gmtime()
 SECRET_KEY = secrets.token_hex(32)
 
 def generate_jwt_token(payload):
@@ -53,6 +62,15 @@ def generate_jwt_token(payload):
     token = jwt.encode(token_payload, SECRET_KEY, algorithm='HS256')
     
     return token
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return PlainTextResponse(str(exc), status_code=400)
 
 
 @app.get("/")
@@ -106,27 +124,58 @@ class NewAccount(BaseModel):
     birth: date
     phone: str
     password: str
-
+    created_at: Optional[int] = None
+    updated_at: Optional[int] = None
 
 # Rota para adicionar um novo usuário
 @app.post("/create-account")
 def create_account(account: NewAccount):
     try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM PERSON WHERE CPF LIKE %s OR EMAIL LIKE %s", (account.cpf, account.email))
+        persons = cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    cpfValid = True
+    emailValid = True
+    for person in persons:
+        if person['CPF'] == account.cpf:
+            cpfValid = False
+        if person['EMAIL'] == account.email:
+            emailValid = False
+
+    if not cpfValid and not emailValid:
+        cursor.close()
+        raise HTTPException(status_code=409 ,detail="O CPF e email inseridos já possuem cadastro")
+    elif not cpfValid and emailValid:
+        cursor.close()
+        raise HTTPException(status_code=409, detail="O CPF inserido já está cadastrado")
+    elif cpfValid and not emailValid:
+        cursor.close()
+        raise HTTPException(status_code=409, detail="O email inserido já está cadastrado")
+    
+    try:
         # Conectar ao banco de dados
         cursor = mysql_connection.cursor(dictionary=True)
+        
+        #Codificação de senha
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(account.password.encode("utf-8"), salt)
         account.password = hashed_password
+
+        #uuid
         uuid_int = int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
         account.uuid = uuid_int
-        print(account.uuid)
 
+        #timestamp
+        time_stamp = calendar.timegm(current_GMT)
+        account.created_at = int(time_stamp)
+        account.updated_at = int(time_stamp)
         # Executar a inserção na tabela produtos
-
-        print("tentando...")
         cursor.execute(
-            "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, NASCIMENTO, TELEFONE, SENHA) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            (account.uuid, account.name, account.cpf, account.email, account.birth, account.phone, account.password)
+            "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, NASCIMENTO, TELEFONE, SENHA, CREATED_AT, UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            (account.uuid, account.name, account.cpf, account.email, account.birth, account.phone, account.password, account.created_at, account.updated_at)
         )
         mysql_connection.commit()
 
