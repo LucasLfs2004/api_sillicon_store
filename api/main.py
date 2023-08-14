@@ -106,9 +106,9 @@ def effect_login(login: effectLogin):
         if person is None:
             raise HTTPException(status_code=401, detail="Usuário não encontrado")
 
-        if bcrypt.checkpw(login.senha.encode("utf-8"), person["SENHA"].encode("utf-8")):
-            print("Eu entro aqui!")
-            token = generate_jwt_token({'user_id': person["ID"]})
+        if bcrypt.checkpw(login.senha.encode("utf-8"), person["senha"].encode("utf-8")):
+            person.pop("senha", None)
+            token = generate_jwt_token({'user_id': person["id"]})
             return {"message": "Login efetuado com sucesso", "user_data": person, "user_token": token}
         else: 
             raise HTTPException(status_code=401, detail="Senha incorreta")
@@ -137,12 +137,13 @@ def create_account(account: NewAccount):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+    print(persons)
     cpfValid = True
     emailValid = True
     for person in persons:
-        if person['CPF'] == account.cpf:
+        if person['cpf'] == account.cpf:
             cpfValid = False
-        if person['EMAIL'] == account.email:
+        if person['email'] == account.email:
             emailValid = False
 
     if not cpfValid and not emailValid:
