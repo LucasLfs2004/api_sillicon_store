@@ -8,7 +8,7 @@ from typing import Optional
 from datetime import date
 from typing import Union
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -17,6 +17,11 @@ from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import calendar
 import time
+import os
+import shutil
+from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import JSONResponse
+from typing import List
 
 
 app = FastAPI()
@@ -33,8 +38,7 @@ mysql_connection = mysql.connector.connect(
 )
 
 origins = [
-    "http://localhost:3000",  # Adicione a URL do seu aplicativo ReactJS aqui
-    "http://localhost:3001",  # Adicione a URL do seu aplicativo ReactJS aqui
+    "*" # Adicione a URL do seu aplicativo ReactJS aqui
 ]
 
 app.add_middleware(
@@ -44,6 +48,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 current_GMT = time.gmtime()
 SECRET_KEY = secrets.token_hex(32)
@@ -192,6 +197,20 @@ def create_account(account: NewAccount):
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+upload_folder = "public"
+os.makedirs(upload_folder, exist_ok=True)
+
+# class ImgUpload(BaseModel):
+#     path: List[UploadFile]
+
+@app.post("/upload")
+def upload_image(file: UploadFile = File(...)):
+    file_path = os.path.join(upload_folder, file.filename)
+    
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+    
+    return {"filename": file.filename}
 
 if __name__ == "__main__":
     import uvicorn
