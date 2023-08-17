@@ -1,11 +1,12 @@
 use sillicon_store;
 
 create table product (
-	uuid varchar(255) not null,
+	id varchar(255) not null,
+    owner bigint not null,
     name varchar(100) not null,
     description text not null,
     brand varchar(50) not null,
-    color varchar(50) not null,
+    color varchar(50),
     price double not null,
     stock int not null,
     active boolean not null,
@@ -14,8 +15,13 @@ create table product (
     rating double not null,
     category varchar(50) not null,
     featured boolean not null,
-    
+    primary key(id),
+    foreign key (owner) references person(id)
 );
+
+
+
+drop table product;
 
 CREATE TABLE person (
 id INT NOT NULL,
@@ -29,25 +35,6 @@ PRIMARY KEY(ID)
 );
 
 INSERT INTO person (id, name, cpf, email, nascimento, telefone, senha) VALUES (0, 'Lucas Ferreira Silva', '520.945.658-74', 'lucas.lfs2004@gmail.com', '2004-06-19', '(11) 97968-4799', 'GallardoLP-570');
-
-create table product (
-	id varchar(255) not null,
-    name varchar(100) not null,
-    description text not null,
-    brand varchar(50) not null,
-    color varchar(50) not null,
-    price double not null,
-    stock int not null,
-    active boolean not null,
-    created_at date not null,
-    updated_at date not null,
-    rating double not null,
-    category varchar(50) not null,
-    featured boolean not null,
-	owner int not null,
-    primary key (id),
-);
-
 
 create table image (
 	id varchar(255) not null,

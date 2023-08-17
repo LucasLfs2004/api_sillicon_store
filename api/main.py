@@ -1,3 +1,6 @@
+import calendar
+import time
+import os
 import uuid
 import mysql.connector
 import bcrypt
@@ -5,8 +8,9 @@ import jwt
 import secrets
 import datetime
 from typing import Optional
-from datetime import date
+from typing import List
 from typing import Union
+from datetime import date
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,13 +19,8 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import calendar
-import time
-import os
 import shutil
-from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from typing import List
 
 
 app = FastAPI()
@@ -203,18 +202,94 @@ os.makedirs(upload_folder, exist_ok=True)
 # class ImgUpload(BaseModel):
 #     path: List[UploadFile]
 
+
+class NewProduct(BaseModel):
+    id: Optional[int] = None
+    name: str
+    brand: str
+    stock: int
+    price: float
+    featured: bool
+    description: str
+    category: str
+    created_at: Optional[int] = None
+    updated_at: Optional[int] = None
+
+
 @app.post("/upload")
-def upload_image(file: UploadFile = File(...)):
-    file_path = os.path.join(upload_folder, file.filename)
-    
-    with open(file_path, "wb") as f:
-        f.write(file.file.read())
-    
-    return {"filename": file.filename}
+def upload_image(files: List[UploadFile] = File(...)):
+    filenames = []
+    for file in files:
+        filename = str(time.time()) + file.filename.replace(' ', '_')
+        filenames.append(filename)
+        file_path = os.path.join(upload_folder, filename)
+        with open(file_path, "wb") as f:
+            f.write(file.file.read())
+    print(filenames)
+    return {"filename": filenames}
+
+class new_category(BaseModel):
+    id: Optional[str] = None
+    name: str 
+
+
+@app.post("/add-category")
+def create_category(category: new_category):
+        try:
+            cursor = mysql_connection.cursor(dictionary=True)
+            category.id = str(uuid.uuid4())
+            cursor.execute(
+                "INSERT INTO CATEGORY (id, name) VALUES (%s, %s)",
+                (category.id, category.name)
+            )
+            mysql_connection.commit()
+
+            # Realizar consulta para obter os dados inseridos
+            cursor.execute("SELECT * FROM category WHERE ID = %s", (category.id,))
+            inserted_data = cursor.fetchone()
+
+            # Fechar o cursor e retornar o ID do produto
+            cursor.close()
+            return {"new_category:": inserted_data}
+        except Exception as e:
+            # Em caso de erro, cancelar a transação e retornar uma resposta de erro
+            mysql_connection.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@app.get('/products')
+def get_products():
+    cursor = mysql_connection.cursor(dictionary=True)
+    cursor.execute("""
+                    SELECT
+                        product.id AS id,
+                        product.name AS product_name,
+                        product.description AS product_description,
+                        product.brand AS product_brand,
+                        product.price AS product_price,
+                        product.stock AS product_stock,
+                        product.category AS product_category,
+                        JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                                'image_url', image.path
+                            )
+                        ) AS images
+                    FROM
+                        product
+                    LEFT JOIN
+                        image ON product.id = image.id
+                    GROUP BY
+                        product.id;
+                    """)
+    product = cursor.fetchall()
+    cursor.close()
+    return product
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
-
 
