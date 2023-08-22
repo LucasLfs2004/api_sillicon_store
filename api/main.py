@@ -219,7 +219,7 @@ class new_product(BaseModel):
     rating: Optional[int] = 0
     id: Optional[str] = None
 
-@app.post("/create-product")
+@app.post("/product")
 async def create_product(owner: str = Form(), name: str = Form(), description: str = Form(), brand: str = Form(), category: str = Form(), 
                    price: str = Form(), stock: str = Form(), featured: str = Form(), files: List[UploadFile] = File(...)):
     filenames = []
@@ -313,53 +313,9 @@ async def create_product(owner: str = Form(), name: str = Form(), description: s
         cursor.close()
 
 
-@app.post("/product")
-async def create_product(
-                            name: str = Form(),
-                            description: str = Form(),
-                            brand: str = Form(),
-                            category: str = Form(),
-                            price: str = Form(),
-                            stock: str = Form(),
-                            featured: str = Form(),
-                            files: List[UploadFile] = File(...)
-                         ):
-    preco = float(price)
-    print(preco)
-    print({ 'name': name,
-            'description': description,
-            'brand': brand,
-            'category': category,
-            'price': float(price),
-            'stock': int(stock),
-            'featured': bool(featured),
-            'files': files})
-    return { 'name': name,
-            'description': description,
-            'brand': brand,
-            'category': category,
-            'price': price,
-            'stock': stock,
-            'featured': featured,
-            'files': files}
-
-
-@app.post("/upload")
-def upload_image(files: List[UploadFile] = File(...)):
-    filenames = []
-    for file in files:
-        filename = str(time.time()) + file.filename.replace(' ', '_')
-        filenames.append(filename)
-        file_path = os.path.join(upload_folder, filename)
-        with open(file_path, "wb") as f:
-            f.write(file.file.read())
-    print(filenames)
-    return {"filename": filenames}
-
 class new_category(BaseModel):
     id: Optional[str] = None
     name: str 
-
 
 @app.post("/add-category")
 def create_category(category: new_category):
