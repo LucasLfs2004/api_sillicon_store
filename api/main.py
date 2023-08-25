@@ -4,7 +4,6 @@ import os
 import uuid
 import mysql.connector
 import bcrypt
-import jwt
 import secrets
 import datetime
 from typing import Optional
@@ -21,8 +20,9 @@ from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import shutil
 from fastapi.responses import JSONResponse
-
-from models.models import effectLogin
+from functions.person import get_persons
+from models.models import effect_login, new_account, new_category, new_product
+from functions.token import generate_jwt_token
 
 app = FastAPI()
 
@@ -53,21 +53,6 @@ app.add_middleware(
 current_GMT = time.gmtime()
 SECRET_KEY = secrets.token_hex(32)
 
-def generate_jwt_token(payload):
-    # Defina o tempo de expiração do token, por exemplo, 1 hora a partir do momento atual.
-    expiration = datetime.datetime.utcnow() + datetime.timedelta(hours=240)
-    
-    # Crie o payload do token com os dados do usuário
-    token_payload = {
-        'exp': expiration,
-        **payload  # Aqui você pode adicionar outras informações sobre o usuário, como ID, nome, etc.
-    }
-    
-    # Gere o token utilizando a função jwt.encode()
-    token = jwt.encode(token_payload, SECRET_KEY, algorithm='HS256')
-    
-    return token
-
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request, exc):
     return PlainTextResponse(str(exc.detail), status_code=exc.status_code)
@@ -82,26 +67,12 @@ async def validation_exception_handler(request, exc):
 def read_root():
     return {"Hello": "World"}
 
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "Nome": "Lucas Ferreira Silva"}
-
 @app.get("/person")
-def get_persons():
-    cursor = mysql_connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM PERSON")
-    person = cursor.fetchall()
-    cursor.close()
-    return person
+get_persons()
 
-
-# class effectLogin(BaseModel):
-#     email: str
-#     senha: str
 
 @app.post("/login")
-def effect_login(login: effectLogin):
+def login(login: effect_login):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM PERSON WHERE EMAIL LIKE %s", (login.email,))
@@ -120,17 +91,6 @@ def effect_login(login: effectLogin):
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
-class NewAccount(BaseModel):
-    name: str
-    uuid: Optional[int] = None
-    cpf: str
-    email: str
-    birth: date
-    phone: str
-    password: str
-    created_at: Optional[int] = None
-    updated_at: Optional[int] = None
 
 # Rota para adicionar um novo usuário
 @app.post("/create-account")
@@ -314,9 +274,9 @@ async def create_product(owner: str = Form(), name: str = Form(), description: s
         cursor.close()
 
 
-class new_category(BaseModel):
-    id: Optional[str] = None
-    name: str 
+# class new_category(BaseModel):
+#     id: Optional[str] = None
+#     name: str 
 
 @app.post("/add-category")
 def create_category(category: new_category):
