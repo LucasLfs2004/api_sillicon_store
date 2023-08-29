@@ -1,5 +1,8 @@
 import jwt
+import datetime
+import secrets
 
+SECRET_KEY = secrets.token_hex(32)
 
 def generate_jwt_token(payload):
     # Defina o tempo de expiração do token, por exemplo, 1 hora a partir do momento atual.

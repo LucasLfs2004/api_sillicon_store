@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import date
 
 class effect_login(BaseModel):
     email: str
