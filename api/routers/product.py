@@ -1,14 +1,11 @@
-from fastapi import APIRouter
 import os
 import calendar
 import uuid
-from fastapi import HTTPException, UploadFile, File, Form
+from fastapi import HTTPException, APIRouter, UploadFile, File, Form
 from dependencies.const import current_GMT
 from typing import List
 from database.connection import mysql_connection
 import time
-from models.models import new_category
-
 
 router = APIRouter()
 
@@ -16,7 +13,7 @@ upload_folder = "public"
 os.makedirs(upload_folder, exist_ok=True)
 
 
-@router.post("/product")
+@router.post("/product", tags=['Produtos'])
 async def create_product(owner: str = Form(), name: str = Form(), description: str = Form(), brand: str = Form(), category: str = Form(),
                          price: str = Form(), stock: str = Form(), featured: str = Form(), files: List[UploadFile] = File(...)):
     filenames = []
@@ -109,7 +106,7 @@ async def create_product(owner: str = Form(), name: str = Form(), description: s
         cursor.close()
 
 
-@router.get('/products')
+@router.get('/products', tags=['Produtos'])
 def get_products():
     cursor = mysql_connection.cursor(dictionary=True)
     cursor.execute("""
@@ -136,27 +133,3 @@ def get_products():
     product = cursor.fetchall()
     cursor.close()
     return product
-
-
-@router.post("/add-category")
-def create_category(category: new_category):
-    try:
-        cursor = mysql_connection.cursor(dictionary=True)
-        category.id = str(uuid.uuid4())
-        cursor.execute(
-            "INSERT INTO CATEGORY (id, name) VALUES (%s, %s)",
-            (category.id, category.name)
-        )
-        mysql_connection.commit()
-
-        # Realizar consulta para obter os dados inseridos
-        cursor.execute("SELECT * FROM category WHERE ID = %s", (category.id,))
-        inserted_data = cursor.fetchone()
-
-        # Fechar o cursor e retornar o ID do produto
-        cursor.close()
-        return {"new_category:": inserted_data}
-    except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
-        mysql_connection.rollback()
-        raise HTTPException(status_code=500, detail=str(e))

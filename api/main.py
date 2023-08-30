@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from routers import person, product
+from routers import person, product, category
 
 app = FastAPI()
 
@@ -22,6 +22,7 @@ current_GMT = time.gmtime()
 
 app.include_router(person.router)
 app.include_router(product.router)
+app.include_router(category.router)
 
 
 @app.exception_handler(StarletteHTTPException)
