@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Column, Integer, String, Date, Text, Double, Boolean
+from sqlalchemy import Column, Integer, String, Date, Text, Double, Boolean, ForeignKey
 
 
 SQLALCHEMY_DATABASE_URL = "mysql://admin:admin@127.0.0.1:3306/SILLICON_STORE"
@@ -44,16 +44,29 @@ class product(Base):
     __tablename__ = "product"
 
     id = Column(String(255), primary_key=True)
-    owner = Column(Integer, nullable=False)
+    owner = Column(Integer, ForeignKey("person.id"), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
-    brand = Column(String(50), nullable=False)
+    brand = Column(String(50), ForeignKey("brand.name"), nullable=False)
     color = Column(String(50))
     price = Column(Double, nullable=False)
     stock = Column(Integer, nullable=False)
     active = Column(Boolean, nullable=False)
     created_at = Column(Integer, nullable=False)
     updated_at = Column(Integer, nullable=False)
-    category = Column(String(50), nullable=False)
+    category = Column(String(50), ForeignKey("category.name"), nullable=False)
     featured = Column(Boolean, nullable=False)
     
+
+class image(Base):
+    __tablename__ = "image"
+
+    id = Column(String(255), ForeignKey("product.id"))
+    path = Column(String(255))
+
+class rating(Base):
+    __tablename__ = "rating"
+    
+    id = Column(String(255), ForeignKey("product.id"), nullable=False)
+    amount = Column(Integer, nullable=False)
+    rating = Column(Double, nullable=False)
