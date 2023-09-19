@@ -5,9 +5,10 @@ import uuid
 
 router = APIRouter()
 
+
 @router.get("/category", tags=["Categoria"])
 def get_categorys():
-    try: 
+    try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM category")
         categorys = cursor.fetchall()
@@ -17,6 +18,7 @@ def get_categorys():
     except Exception as e:
         cursor.close()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/category", tags=['Categoria'])
 def create_category(category: new_category):

@@ -2,21 +2,45 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 
+
 class effect_login(BaseModel):
     email: str
     senha: str
 
 
-class new_account(BaseModel):
+# class Person(BaseModel):
+#     name: str
+#     id: Optional[int] = None
+#     cpf: str
+#     email: str
+#     birth: date
+#     phone: str
+#     password: str
+#     created_at: Optional[int] = None
+#     updated_at: Optional[int] = None
+
+
+class PersonBase(BaseModel):
     name: str
-    uuid: Optional[int] = None
-    cpf: str
     email: str
-    birth: date
+    cpf: str
     phone: str
+    birth: str
     password: str
-    created_at: Optional[int] = None
-    updated_at: Optional[int] = None
+
+
+class PersonCreate(PersonBase):
+    pass
+
+
+class PersonInDB(PersonBase):
+    id: int
+    created_at: int
+    updated_at: int
+
+
+class Person(PersonInDB):
+    pass
 
 
 class new_product(BaseModel):
@@ -38,4 +62,4 @@ class new_product(BaseModel):
 
 class new_category(BaseModel):
     id: Optional[str] = None
-    name: str 
+    name: str
