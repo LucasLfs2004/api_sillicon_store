@@ -26,7 +26,3 @@ class Person(PersonBase):
 class PersonLogin(BaseModel):
     email: str
     password: str
-
-
-class PersonDelete(BaseModel):
-    param: str

@@ -5,7 +5,7 @@ import uuid
 import calendar
 import time
 from fastapi import HTTPException
-from sql_app.schemas import PersonBase, PersonLogin, PersonDelete
+from sql_app.schemas import PersonBase, PersonLogin
 from sql_app.models import Person
 from dependencies.token import generate_jwt_token
 import re
@@ -70,8 +70,24 @@ def create_person(db: Session, user: PersonBase):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_person(db: Session, email: str):
-    return db.query(Person).filter(Person.email == email).first()
+def get_person(db: Session, param: str):
+    try:
+        pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if re.match(pattern, param):
+            person = db.query(Person).filter(
+                Person.email == param).first()
+            if person:
+                return {'user: ': person}
+            else:
+                return {'user: ': None}
+        else:
+            person = db.query(Person).filter(Person.cpf == param).first()
+            if person:
+                return {'user: ': person}
+            else:
+                return {'user: ': None}
+    except Exception as e:
+        raise MyException(status_code=500, detail=str(e))
 
 
 def get_people(db: Session):
@@ -88,17 +104,17 @@ def update_person(db: Session, person_id: int, updated_person: Person):
     return person
 
 
-def delete_person(db: Session, param: PersonDelete):
+def delete_person(db: Session, param: str):
     try:
         pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
-        if re.match(pattern, param.param):
+        if re.match(pattern, param):
             person = db.query(Person).filter(
-                Person.email == param.param).first()
+                Person.email == param).first()
             if person:
                 db.delete(person)
                 db.commit()
         else:
-            person = db.query(Person).filter(Person.cpf == param.param).first()
+            person = db.query(Person).filter(Person.cpf == param).first()
             if person:
                 db.delete(person)
                 db.commit()
