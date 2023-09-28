@@ -29,7 +29,7 @@ def create_new_product(db: Session, product: dict, files: List[UploadFile] = Fil
         filenames = []
         print(product)
         # return product
-        db_product = Product(id=product['id'], owner_id=product['owner_id'], name=product['name'], description=product['description'], brand=product['brand'], color=product['color'],
+        db_product = Product(id=product['id'], seller_id=product['owner_id'], name=product['name'], description=product['description'], brand=product['brand'], color=product['color'],
                              price=product['price'], stock=product['stock'], active=product['active'], created_at=product['created_at'], updated_at=product['updated_at'], category=product['category'], featured=True)
         # Executar a inserção na tabela produtos
         db.add(db_product)
@@ -51,88 +51,106 @@ def create_new_product(db: Session, product: dict, files: List[UploadFile] = Fil
         db.add(db_rating)
         db.commit()
 
-        # Realizar consulta para obter os dados inseridos
-        cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute("""
-									SELECT
-											product.id AS id,
-											product.name AS product_name,
-											product.description AS product_description,
-											product.brand AS product_brand,
-											product.price AS product_price,
-											product.stock AS product_stock,
-											product.category AS product_category,
-											JSON_ARRAYAGG(
-													JSON_OBJECT(
-															'img_path', image.path
-													)
-											) AS images,
-											JSON_ARRAYAGG(
-													JSON_OBJECT(
-															'amount', rating.amount,
-															'rating', rating.rating
-													)
-											) AS rating
-									FROM
-											product
-									LEFT JOIN
-											image ON product.id = image.id
-									LEFT JOIN
-											rating ON product.id = rating.id
-									WHERE
-											product.id = %s
-									GROUP BY
-											product.id;
-											""", (product['id'],)
-        )
-        product_data = cursor.fetchone()
-        cursor.close()
-        return {"new_product:": product_data}
+        # # Realizar consulta para obter os dados inseridos
+        # cursor = mysql_connection.cursor(dictionary=True)
+        # cursor.execute("""
+        # 							SELECT
+        # 									product.id AS id,
+        # 									product.name AS product_name,
+        # 									product.description AS product_description,
+        # 									product.brand AS product_brand,
+        # 									product.price AS product_price,
+        # 									product.stock AS product_stock,
+        # 									product.category AS product_category,
+        # 									JSON_ARRAYAGG(
+        # 											JSON_OBJECT(
+        # 													'img_path', image.path
+        # 											)
+        # 									) AS images,
+        # 									JSON_ARRAYAGG(
+        # 											JSON_OBJECT(
+        # 													'amount', rating.amount,
+        # 													'rating', rating.rating
+        # 											)
+        # 									) AS rating
+        # 							FROM
+        # 									product
+        # 							LEFT JOIN
+        # 									image ON product.id = image.id
+        # 							LEFT JOIN
+        # 									rating ON product.id = rating.id
+        # 							WHERE
+        # 									product.id = %s
+        # 							GROUP BY
+        # 									product.id;
+        # 									""", (product['id'],)
+        # )
+        # product_data = cursor.fetchone()
+        # cursor.close()
+        return {"new_product:": db_product}
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# def get_all_products(db: Session):
+#     try:
+#         cursor = mysql_connection.cursor(dictionary=True)
+#         cursor.execute("""
+#                                         SELECT
+#                                                 product.id AS id,
+#                                                 product.name AS product_name,
+#                                                 product.description AS product_description,
+#                                                 product.brand AS product_brand,
+#                                                 product.price AS product_price,
+#                                                 product.stock AS product_stock,
+#                                                 product.category AS product_category,
+#                                                 JSON_ARRAYAGG(
+#                                                         JSON_OBJECT(
+#                                                                 'image_url', image.path
+#                                                         )
+#                                                 ) AS images,
+#                                                 rating.rating as rating,
+#                                                 rating.amount as rating_amount
+#                                         FROM
+#                                                 product
+#                                         LEFT JOIN
+#                                                 image ON product.id = image.product_id
+#                                         LEFT JOIN
+#                                                 rating on product.id = rating.id
+#                                         GROUP BY
+#                                                 product.id;
+#                                         """)
+#         products = cursor.fetchall()
+#         cursor.close()
+
+#         for i in range(len(products)):
+#             image_links_str = products[i]['images']
+#             image_links_list = json.loads(image_links_str)
+#             image_urls = [item['image_url'] for item in image_links_list]
+#             products[i]['images'] = image_urls
+
+#         return products
+#     except IntegrityError as e:
+#         print(str(e))
+#     except Exception as e:
+#         raise MyException(status_code=500, detail=str(e))
 def get_all_products(db: Session):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute("""
-                                        SELECT
-                                                product.id AS id,
-                                                product.name AS product_name,
-                                                product.description AS product_description,
-                                                product.brand AS product_brand,
-                                                product.price AS product_price,
-                                                product.stock AS product_stock,
-                                                product.category AS product_category,
-                                                JSON_ARRAYAGG(
-                                                        JSON_OBJECT(
-                                                                'image_url', image.path
-                                                        )
-                                                ) AS images,
-                                                rating.rating as rating,
-                                                rating.amount as rating_amount
-                                        FROM
-                                                product
-                                        LEFT JOIN
-                                                image ON product.id = image.product_id
-                                        LEFT JOIN
-                                                rating on product.id = rating.id
-                                        GROUP BY
-                                                product.id;
-                                        """)
-        products = cursor.fetchall()
-        cursor.close()
+        products = db.query(Product)
 
-        for i in range(len(products)):
-            image_links_str = products[i]['images']
-            image_links_list = json.loads(image_links_str)
-            image_urls = [item['image_url'] for item in image_links_list]
-            products[i]['images'] = image_urls
+        join_products = products.join(
+            Rating, Rating.id == Product.id, isouter=True)
+
+        return join_products.all()
+        # for i in range(len(products)):
+        #     image_links_str = products[i]['images']
+        #     image_links_list = json.loads(image_links_str)
+        #     image_urls = [item['image_url'] for item in image_links_list]
+        #     products[i]['images'] = image_urls
 
         return products
     except IntegrityError as e:
-        error_message = str(e)
         print(str(e))
     except Exception as e:
         raise MyException(status_code=500, detail=str(e))

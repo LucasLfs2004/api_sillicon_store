@@ -26,3 +26,8 @@ class Person(PersonBase):
 class PersonLogin(BaseModel):
     email: str
     password: str
+
+
+class PersonOffice(BaseModel):
+    email: str
+    is_active: int

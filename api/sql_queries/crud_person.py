@@ -5,7 +5,7 @@ import uuid
 import calendar
 import time
 from fastapi import HTTPException
-from sql_app.schemas import PersonBase, PersonLogin
+from sql_app.schemas import PersonBase, PersonLogin, PersonOffice
 from sql_app.models import Person
 from dependencies.token import generate_jwt_token
 import re
@@ -91,7 +91,10 @@ def get_person(db: Session, param: str):
 
 
 def get_people(db: Session):
-    return db.query(Person).all()
+    peoples = db.query(Person).all()
+    for i in range(len(peoples)):
+        del peoples[i].password
+    return peoples
 
 
 def update_person(db: Session, person_id: int, updated_person: Person):
@@ -102,6 +105,28 @@ def update_person(db: Session, person_id: int, updated_person: Person):
         db.commit()
         db.refresh(person)
     return person
+
+
+def update_person_seller_status(db: Session, office: PersonOffice):
+    person = db.query(Person).filter(Person.email == office.email).first()
+    if person:
+        # Atualiza o atributo is_seller
+        person.is_seller = office.is_active
+        db.commit()  # Confirme a transação para persistir as alterações no banco de dados
+        return True  # Retorna True para indicar que a atualização foi bem-sucedida
+    else:
+        return False  # Retorna False se o ID da pessoa não for encontrado
+
+
+def update_person_admin_status(db: Session, office: PersonOffice):
+    person = db.query(Person).filter(Person.email == office.email).first()
+    if person:
+        # Atualiza o atributo is_seller
+        person.is_admin = office.is_active
+        db.commit()  # Confirme a transação para persistir as alterações no banco de dados
+        return True  # Retorna True para indicar que a atualização foi bem-sucedida
+    else:
+        return False  # Retorna False se o ID da pessoa não for encontrado
 
 
 def delete_person(db: Session, param: str):

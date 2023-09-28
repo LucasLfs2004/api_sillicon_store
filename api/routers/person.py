@@ -10,8 +10,8 @@ from dependencies.token import generate_jwt_token
 from sqlalchemy.orm import Session
 from sql_app.database import SessionLocal
 from sql_app.models import Person
-from sql_app.schemas import PersonBase, PersonLogin
-from sql_queries.crud_person import get_people, create_person, login_person, delete_person
+from sql_app.schemas import PersonBase, PersonLogin, PersonOffice
+from sql_queries.crud_person import get_people, create_person, login_person, delete_person, update_person_seller_status, update_person_admin_status
 
 router = APIRouter()
 
@@ -40,6 +40,18 @@ def login(user: PersonLogin, db: Session = Depends(get_db)):
 def post_person(user: PersonBase, db: Session = Depends(get_db)):
     validation = create_person(db, user)
     return validation
+
+
+@router.post("/person-seller", tags=['person'])
+def post_person(PersonOffice: PersonOffice, db: Session = Depends(get_db)):
+    success = update_person_seller_status(db, PersonOffice)
+    return success
+
+
+@router.post("/person-admin", tags=['person'])
+def post_person(PersonOffice: PersonOffice, db: Session = Depends(get_db)):
+    success = update_person_admin_status(db, PersonOffice)
+    return success
 
 
 @router.delete("/person", tags=['person'])

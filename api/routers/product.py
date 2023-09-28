@@ -24,14 +24,14 @@ def get_db():
 
 @router.post("/product", tags=['Produtos'])
 async def create_product(owner: str = Form(), name: str = Form(), description: str = Form(), brand: str = Form(), category: str = Form(),
-                         price: str = Form(), stock: str = Form(), files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
+                         price: str = Form(), stock: str = Form(), featured: str = Form(), files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
 
     time_stamp = calendar.timegm(current_GMT)
     product = {
         'id': str(uuid.uuid4()),
         'owner_id': int(owner),
         'active': bool(True),
-        'featured': True,
+        'featured': featured,
         'name': name,
         'description': description,
         'brand': brand,

@@ -9,8 +9,8 @@ class Product(Base):
 
     id = Column(String(255), primary_key=True)
     # owner = Column(Integer, ForeignKey("person.id"), nullable=False)
-    owner_id = Column(Integer, ForeignKey("person.id"), nullable=False)
-    owner = relationship("Person", back_populates="products")
+    seller_id = Column(Integer, ForeignKey("person.id"), nullable=False)
+    seller = relationship("Person", back_populates="products")
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     brand = Column(String(50), ForeignKey("brand.name"), nullable=False)
@@ -22,8 +22,10 @@ class Product(Base):
     updated_at = Column(Integer, nullable=False)
     category = Column(String(50), ForeignKey("category.name"), nullable=False)
     featured = Column(Boolean, nullable=False)
-    rating = relationship('Rating', uselist=False, back_populates='product')
-    images = relationship('Image', back_populates='product')
+    rating = relationship('Rating', uselist=False,
+                          back_populates='product', foreign_keys='Product.id', primaryjoin="and_(Product.id==Rating.id)")
+    images = relationship('Image', back_populates='product',
+                          )
 
 
 class Person(Base):
@@ -38,8 +40,11 @@ class Person(Base):
     birth = Column(Date, nullable=False)
     created_at = Column(Integer, nullable=False)
     updated_at = Column(Integer, nullable=False)
-    products = relationship("Product", back_populates="owner",
-                            primaryjoin=id == Product.owner_id)
+    is_admin = Column(Boolean, default=False)
+    is_seller = Column(Boolean, default=False)
+    products = relationship("Product",
+                            back_populates="seller",
+                            )
 
 
 class Brand(Base):
@@ -70,4 +75,5 @@ class Rating(Base):
     id = Column(String(255), ForeignKey("product.id"), primary_key=True)
     amount = Column(Integer, nullable=False)
     rating = Column(Double, nullable=False)
-    product = relationship('Product', back_populates='rating')
+    product = relationship(
+        'Product', back_populates='rating', uselist=False, foreign_keys="Rating.id",  primaryjoin="and_(Rating.id==Product.id)")
