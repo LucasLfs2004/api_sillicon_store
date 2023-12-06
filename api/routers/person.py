@@ -14,7 +14,23 @@ router = APIRouter()
 @router.get("/person", tags=['person'])
 def get_persons():
     cursor = mysql_connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM PERSON")
+    cursor.execute("""
+                   SELECT
+                        person.id,
+                        person.name,
+                        person.cpf,
+                        person.email,
+                        person.birthday,
+                        person.phone_number,
+                        seller.admin as isAdmin,
+                        seller.seller as isSeller,
+                        seller.id as idSeller
+                    FROM
+                        person
+                    LEFT JOIN
+                        seller ON person.id = seller.id_person;
+                   """)
+    # cursor.execute("select * from person")
     person = cursor.fetchall()
     cursor.close()
     return person
@@ -33,8 +49,8 @@ def effect_login(login: effect_login):
             raise HTTPException(
                 status_code=401, detail="Usuário não encontrado")
 
-        if bcrypt.checkpw(login.senha.encode("utf-8"), person["senha"].encode("utf-8")):
-            person.pop("senha", None)
+        if bcrypt.checkpw(login.senha.encode("utf-8"), person["password"].encode("utf-8")):
+            person.pop("password", None)
             token = generate_jwt_token({'user_id': person["id"]})
             return {"message": "Login efetuado com sucesso", "user_data": person, "user_token": token}
         else:
@@ -85,10 +101,13 @@ def create_account(account: new_account):
         hashed_password = bcrypt.hashpw(account.password.encode("utf-8"), salt)
         account.password = hashed_password
 
-        # uuid
-        uuid_int = int.from_bytes(
-            uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
-        account.uuid = uuid_int
+        # uuid int
+        # uuid_int = int.from_bytes(
+        #     uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
+
+        #uuid 
+        account.uuid = str(uuid.uuid4())
+        print(account.uuid)
 
         # timestamp
         time_stamp = calendar.timegm(current_GMT)
@@ -96,7 +115,7 @@ def create_account(account: new_account):
         account.updated_at = int(time_stamp)
         # Executar a inserção na tabela produtos
         cursor.execute(
-            "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, NASCIMENTO, TELEFONE, SENHA, CREATED_AT, UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+            "INSERT INTO PERSON (ID, NAME, CPF, EMAIL, BIRTHDAY, PHONE_NUMBER, PASSWORD, CREATED_AT, UPDATED_AT) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
             (account.uuid, account.name, account.cpf, account.email, account.birth,
              account.phone, account.password, account.created_at, account.updated_at)
         )

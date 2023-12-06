@@ -9,7 +9,7 @@ class effect_login(BaseModel):
 
 class new_account(BaseModel):
     name: str
-    uuid: Optional[int] = None
+    uuid: Optional[str] = None
     cpf: str
     email: str
     birth: date
