@@ -64,37 +64,37 @@ async def create_product(owner: str = Form(), name: str = Form(), description: s
 
         # Realizar consulta para obter os dados inseridos
         cursor.execute("""
-									SELECT
-											product.id AS id,
-											product.name AS product_name,
-											product.description AS product_description,
-											product.brand AS product_brand,
-											product.price AS product_price,
-											product.stock AS product_stock,
-											product.category AS product_category,
-											JSON_ARRAYAGG(
-													JSON_OBJECT(
-															'img_path', image.path
-													)
-											) AS images,
-											JSON_ARRAYAGG(
-													JSON_OBJECT(
-															'amount', rating.amount,
-															'rating', rating.rating
-													)
-											) AS rating
-									FROM
-											product
-									LEFT JOIN
-											image ON product.id = image.id
-									LEFT JOIN
-											rating ON product.id = rating.id
-									WHERE
-											product.id = %s
-									GROUP BY
-											product.id;
-											""", (product['id'],)
-        )
+            SELECT
+                    product.id AS id,
+                    product.name AS product_name,
+                    product.description AS product_description,
+                    product.brand AS product_brand,
+                    product.price AS product_price,
+                    product.stock AS product_stock,
+                    product.category AS product_category,
+                    JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                                    'img_path', image.path
+                            )
+                    ) AS images,
+                    JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                                    'amount', rating.amount,
+                                    'rating', rating.rating
+                            )
+                    ) AS rating
+            FROM
+                    product
+            LEFT JOIN
+                    image ON product.id = image.id
+            LEFT JOIN
+                    rating ON product.id = rating.id
+            WHERE
+                    product.id = %s
+            GROUP BY
+                    product.id;
+                    """, (product['id'],)
+                       )
         product_data = cursor.fetchone()
         cursor.close()
         return {"new_product:": product_data}
