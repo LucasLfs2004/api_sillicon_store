@@ -9,6 +9,7 @@ from fastapi import HTTPException, APIRouter, UploadFile, File, Form
 router = APIRouter()
 
 upload_folder = "public/brand"
+os.makedirs(upload_folder, exist_ok=True)
 
 
 @router.get("/brand", tags=["Marca"])
