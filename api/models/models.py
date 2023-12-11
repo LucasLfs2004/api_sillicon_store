@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import date
 
+
 class effect_login(BaseModel):
     email: str
     senha: str
@@ -38,4 +39,11 @@ class new_product(BaseModel):
 
 class new_category(BaseModel):
     id: Optional[str] = None
-    name: str 
+    name: str
+
+
+class new_comment(BaseModel):
+    id_product: str
+    title: str
+    comment: Optional[str] = None
+    rating: float

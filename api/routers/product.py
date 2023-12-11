@@ -192,7 +192,8 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
                 f.write(file.file.read())
             cursor.execute(
                 "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
-                (str(uuid.uuid4()), product['id'], str("public/" + filename))
+                (str(uuid.uuid4()), product['id'],
+                 str("public/product" + filename))
             )
         # print(filenames)
 
@@ -276,7 +277,67 @@ def delete_product(id_product: str = Form()):
                 id_product,)
         )
         data = cursor.fetchall()
+        print(data)
+        cursor.execute("DELETE FROM product where id LIKE %s", (id_product,))
+        mysql_connection.commit()
 
-        return data
+        for filename in data:
+            filename_img = os.path.join(filename["path"])
+            print(filename)
+            print(filename_img)
+            os.remove(filename_img)
+
+        return True
     except Exception as e:
         return e
+
+
+@router.delete("/product/image", tags=["Produtos"])
+def delete_image(id_image: str = Form()):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute("DELETE FROM IMAGE WHERE id = %s", (id_image,))
+        mysql_connection.commit()
+        return True
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.post("/product/image", tags=["Produtos"])
+def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        filenames = []
+
+        for file in files:
+            filename = str(time.time()) + file.filename.replace(' ', '_')
+            file_path = os.path.join(upload_folder, filename)
+            filenames.append(str("public/product/" + filename))
+            with open(file_path, "wb") as f:
+                f.write(file.file.read())
+            cursor.execute(
+                "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
+                (str(uuid.uuid4()), id_product,
+                 str("public/product/" + filename))
+            )
+            mysql_connection.commit()
+        return filenames
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.post("/product/description", tags=["Produtos"])
+def create_description():
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute("INSERT INTO description (id) values ")
+        return True
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
