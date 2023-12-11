@@ -272,8 +272,11 @@ def delete_product(id_product: str = Form()):
         cursor = mysql_connection.cursor(dictionary=True)
 
         cursor.execute(
-            "SELECT image.path FROM product WHERE image.id_product LIKE %s", (id_product,))
+            "SELECT image.path FROM image WHERE image.id_product LIKE %s", (
+                id_product,)
+        )
+        data = cursor.fetchall()
 
-        return "Pronto"
+        return data
     except Exception as e:
         return e
