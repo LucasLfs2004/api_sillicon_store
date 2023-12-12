@@ -1,5 +1,4 @@
 import os
-import calendar
 import uuid
 from fastapi import HTTPException, APIRouter, UploadFile, File, Form
 from dependencies.const import current_GMT
@@ -8,6 +7,7 @@ from database.connection import mysql_connection
 import time
 import json
 from models.models import new_description
+from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products
 
 router = APIRouter()
 
@@ -20,9 +20,31 @@ def get_products():
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM PRODUCT",)
+        cursor.execute(get_all_products)
         data = cursor.fetchall()
-        return data
+        products = []
+
+        for product in data:
+            products.append(json.loads(product["product"]))
+
+        return products
+    except Exception as e:
+        return e
+
+
+@router.get("/product/{limit}", tags=['Produtos'])
+def get_limited_products(limit: int):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute(get_limit_products, (limit,))
+        data = cursor.fetchall()
+        products = []
+
+        for product in data:
+            products.append(json.loads(product["product"]))
+        print(products)
+        return products
     except Exception as e:
         return e
 
@@ -32,55 +54,7 @@ def search_product(product_id: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
-        cursor.execute("""SELECT JSON_OBJECT(
-                            'id', product.id,
-                            'name', product.name,
-                            'stock', product.stock,
-                            'warranty', product.warranty,
-                            'model', product.model,
-                            'featured', product.featured,
-                            'active', product.active,
-                            'brand', brand.name,
-                            'category', category.name,
-                            'value', JSON_OBJECT(
-                                'price_now', value_product.price_now,
-                                'common_price', value_product.common_price,
-                                'portions', value_product.portions,
-                                'fees_monthly', value_product.fees_monthly,
-                                'fees_credit', value_product.fees_credit
-                            ),
-                            'rating', JSON_OBJECT(
-                                'amount_rating', rating.amount,
-                                'rating_value', rating.rating
-                            ),
-                            'images', JSON_ARRAYAGG(
-                                image.path
-                            )
-                        ) AS product
-                        FROM product
-                        LEFT JOIN category ON product.category_id = category.id
-                        LEFT JOIN brand ON product.brand_id = brand.id
-                        LEFT JOIN value_product ON product.id = value_product.id_product
-                        LEFT JOIN rating ON product.id = rating.id_product
-                        LEFT JOIN image ON product.id = image.id_product
-                        WHERE product.id = %s
-                        GROUP BY
-                            product.id,
-                            product.name,
-                            product.stock,
-                            product.warranty,
-                            product.model,
-                            product.featured,
-                            product.active,
-                            brand.name,
-                            category.name,
-                            value_product.price_now,
-                            value_product.common_price,
-                            value_product.portions,
-                            value_product.fees_monthly,
-                            value_product.fees_credit,
-                            rating.amount,
-                            rating.rating;""",
+        cursor.execute(get_product_id,
                        (product_id,))
         data = cursor.fetchone()
         return json.loads(data["product"])
@@ -95,55 +69,7 @@ def search_product(product_name: str):
 
         search = str("%" + product_name + "%")
 
-        cursor.execute("""SELECT JSON_OBJECT(
-                            'id', product.id,
-                            'name', product.name,
-                            'stock', product.stock,
-                            'warranty', product.warranty,
-                            'model', product.model,
-                            'featured', product.featured,
-                            'active', product.active,
-                            'brand', brand.name,
-                            'category', category.name,
-                            'value', JSON_OBJECT(
-                                'price_now', value_product.price_now,
-                                'common_price', value_product.common_price,
-                                'portions', value_product.portions,
-                                'fees_monthly', value_product.fees_monthly,
-                                'fees_credit', value_product.fees_credit
-                            ),
-                            'rating', JSON_OBJECT(
-                                'amount_rating', rating.amount,
-                                'rating_value', rating.rating
-                            ),
-                            'images', JSON_ARRAYAGG(
-                                image.path
-                            )
-                        ) AS product
-                        FROM product
-                        LEFT JOIN category ON product.category_id = category.id
-                        LEFT JOIN brand ON product.brand_id = brand.id
-                        LEFT JOIN value_product ON product.id = value_product.id_product
-                        LEFT JOIN rating ON product.id = rating.id_product
-                        LEFT JOIN image ON product.id = image.id_product
-                        WHERE product.name LIKE %s OR product.model LIKE %s
-                        GROUP BY
-                            product.id,
-                            product.name,
-                            product.stock,
-                            product.warranty,
-                            product.model,
-                            product.featured,
-                            product.active,
-                            brand.name,
-                            category.name,
-                            value_product.price_now,
-                            value_product.common_price,
-                            value_product.portions,
-                            value_product.fees_monthly,
-                            value_product.fees_credit,
-                            rating.amount,
-                            rating.rating;""",
+        cursor.execute(search_product_name,
                        (search, search))
         data = cursor.fetchall()
         products = []
@@ -207,55 +133,7 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
         print("Entrando no select gigante")
 
         # Realizar consulta para obter os dados inseridos
-        cursor.execute("""SELECT JSON_OBJECT(
-                            'id', product.id,
-                            'name', product.name,
-                            'stock', product.stock,
-                            'warranty', product.warranty,
-                            'model', product.model,
-                            'featured', product.featured,
-                            'active', product.active,
-                            'brand', brand.name,
-                            'category', category.name,
-                            'value', JSON_OBJECT(
-                                'price_now', value_product.price_now,
-                                'common_price', value_product.common_price,
-                                'portions', value_product.portions,
-                                'fees_monthly', value_product.fees_monthly,
-                                'fees_credit', value_product.fees_credit
-                            ),
-                            'rating', JSON_OBJECT(
-                                'amount_rating', rating.amount,
-                                'rating_value', rating.rating
-                            ),
-                            'images', JSON_ARRAYAGG(
-                                image.path
-                            )
-                        ) AS product
-                        FROM product
-                        LEFT JOIN category ON product.category_id = category.id
-                        LEFT JOIN brand ON product.brand_id = brand.id
-                        LEFT JOIN value_product ON product.id = value_product.id_product
-                        LEFT JOIN rating ON product.id = rating.id_product
-                        LEFT JOIN image ON product.id = image.id_product
-                        WHERE product.id = %s
-                        GROUP BY
-                            product.id,
-                            product.name,
-                            product.stock,
-                            product.warranty,
-                            product.model,
-                            product.featured,
-                            product.active,
-                            brand.name,
-                            category.name,
-                            value_product.price_now,
-                            value_product.common_price,
-                            value_product.portions,
-                            value_product.fees_monthly,
-                            value_product.fees_credit,
-                            rating.amount,
-                            rating.rating;""",
+        cursor.execute(get_product_id,
                        (product['id'],))
         product_data = cursor.fetchall()
         cursor.close()
