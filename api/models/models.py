@@ -47,3 +47,8 @@ class new_comment(BaseModel):
     title: str
     comment: Optional[str] = None
     rating: float
+
+
+class new_description(BaseModel):
+    id_product: str
+    description: str

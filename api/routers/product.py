@@ -7,6 +7,7 @@ from typing import List
 from database.connection import mysql_connection
 import time
 import json
+from models.models import new_description
 
 router = APIRouter()
 
@@ -331,11 +332,42 @@ def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
 
 
 @router.post("/product/description", tags=["Produtos"])
-def create_description():
+def create_description(description: new_description):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
-        cursor.execute("INSERT INTO description (id) values ")
+        cursor.execute(
+            "INSERT INTO description_product (id_product, description_html) values (%s, %s)", (description.id_product, description.description))
+        mysql_connection.commit()
+        return True
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.patch("/product/description", tags=["Produtos"])
+def create_description(description: new_description):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute(
+            "UPDATE description_product SET description_html = %s WHERE id_product = %s", (description.description, description.id_product))
+        mysql_connection.commit()
+        return True
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.delete("/product/description", tags=["Produtos"])
+def delete_description(id_product: str = Form()):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            "DELETE FROM description_product WHERE id_product = %s", (id_product))
+        mysql_connection.commit()
         return True
     except Exception as e:
         return e
