@@ -175,8 +175,7 @@ def update_brand(old_name: str = Form(), name: str = Form(), brand_logo: UploadF
 
         cursor.execute(
             "UPDATE BRAND SET name = %s, brand_logo = %s, brand_logo_black = %s WHERE name = %s",
-            (name, str("public/brand/" + filename_brand_logo),
-             str("public/brand/" + filename_brand_logo_black), old_name)
+            (name, filename_brand_logo, filename_brand_logo_black, old_name)
         )
         mysql_connection.commit()
 

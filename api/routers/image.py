@@ -1,17 +1,17 @@
 from fastapi import APIRouter, FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+import os
 
 
 router = APIRouter()
-app = FastAPI()
-
-# Configuração para servir arquivos estáticos (imagens) da pasta "public"
-# app.mount("/public", StaticFiles(directory="public"), name="public")
-
-# Rota para servir imagens estáticas
 
 
-@router.get("/image/{image_path}", tags=["Imagens"])
+@router.get("/image/product/{image_path}", tags=["Imagens"])
 def get_image(image_path: str):
-    return image_path
+    print(image_path)
+    file_path = str("public/product/" + image_path)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "File not found"}
+    # return image_path

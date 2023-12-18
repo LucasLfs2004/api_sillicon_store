@@ -25,7 +25,9 @@ def get_products():
         products = []
 
         for product in data:
-            products.append(json.loads(product["product"]))
+            dict_product = json.loads(product["product"])
+            dict_product["images"] = sorted(dict_product["images"])
+            products.append(dict_product)
 
         return products
     except Exception as e:
@@ -42,7 +44,9 @@ def get_limited_products(limit: int):
         products = []
 
         for product in data:
-            products.append(json.loads(product["product"]))
+            dict_product = json.loads(product["product"])
+            dict_product["images"] = sorted(dict_product["images"])
+            products.append(dict_product)
         print(products)
         return products
     except Exception as e:
@@ -75,7 +79,9 @@ def search_product(product_name: str):
         products = []
 
         for product in data:
-            products.append(json.loads(product["product"]))
+            dict_product = json.loads(product["product"])
+            dict_product["images"] = sorted(dict_product["images"])
+            products.append(dict_product)
 
         return products
     except Exception as e:
@@ -88,7 +94,7 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
     filenames = []
     # time_stamp = calendar.timegm(current_GMT)
     product = {
-        'id': str(uuid.uuid4()),
+        'id': int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32),
         'owner': owner,
         'active': True,
         'featured': bool(featured),
@@ -119,8 +125,7 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
                 f.write(file.file.read())
             cursor.execute(
                 "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
-                (str(uuid.uuid4()), product['id'],
-                 str("public/product" + filename))
+                (str(uuid.uuid4()), product['id'], filename)
             )
         # print(filenames)
 
@@ -193,13 +198,13 @@ def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
         for file in files:
             filename = str(time.time()) + file.filename.replace(' ', '_')
             file_path = os.path.join(upload_folder, filename)
-            filenames.append(str("public/product/" + filename))
+            filenames.append(filename)
             with open(file_path, "wb") as f:
                 f.write(file.file.read())
             cursor.execute(
                 "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
                 (str(uuid.uuid4()), id_product,
-                 str("public/product/" + filename))
+                 filename)
             )
             mysql_connection.commit()
         return filenames

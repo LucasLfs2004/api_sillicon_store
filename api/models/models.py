@@ -5,19 +5,16 @@ from datetime import date
 
 class effect_login(BaseModel):
     email: str
-    senha: str
+    password: str
 
 
 class new_account(BaseModel):
     name: str
-    uuid: Optional[str] = None
     cpf: str
     email: str
     birth: date
     phone: str
     password: str
-    created_at: Optional[int] = None
-    updated_at: Optional[int] = None
 
 
 class new_product(BaseModel):
