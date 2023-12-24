@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/image/product/{image_path}", tags=["Imagens"])
-def get_image(image_path: str):
+async def get_image(image_path: str):
     print(image_path)
     file_path = str("public/product/" + image_path)
     if os.path.exists(file_path):
@@ -18,7 +18,7 @@ def get_image(image_path: str):
 
 
 @router.get("/image/brand/{image_path}", tags=["Imagens"])
-def get_image(image_path: str):
+async def get_image(image_path: str):
     print(image_path)
     file_path = str("public/brand/" + image_path)
     if os.path.exists(file_path):

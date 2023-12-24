@@ -217,8 +217,13 @@ get_product_id = """
                     product.featured,
                     'active',
                     product.active,
-                    'brand',
-                    brand.name,
+                    'brand', JSON_OBJECT(
+                        'name', 
+                        brand.name,
+                        'logo',
+                        brand.brand_logo,
+                        'logo_black', brand.brand_logo_black
+                    ),
                     'category',
                     category.name,
                     'value',
@@ -265,7 +270,8 @@ get_product_id = """
                         description_product.updated_at
                     ),
                     'images',
-                    JSON_ARRAYAGG(image.path)
+                    JSON_ARRAYAGG(image.path),
+                    'store_name', seller.store_name
                 ) AS product
             FROM product
                 LEFT JOIN category ON product.category_id = category.id
@@ -275,6 +281,7 @@ get_product_id = """
                 LEFT JOIN image ON product.id = image.id_product
                 LEFT JOIN comment ON product.id = comment.id_product
                 LEFT JOIN description_product ON product.id = description_product.id_product
+                LEFT JOIN seller ON product.seller_id = seller.id
                 WHERE product.id = %s
             GROUP BY
                 product.id,
@@ -285,6 +292,8 @@ get_product_id = """
                 product.featured,
                 product.active,
                 brand.name,
+                brand.brand_logo,
+                brand.brand_logo_black,
                 category.name,
                 value_product.price_now,
                 value_product.common_price,
@@ -298,7 +307,8 @@ get_product_id = """
                 comment.title_text,
                 comment.comment_text,
                 description_product.updated_at,
-                description_product.description_html;
+                description_product.description_html,
+                seller.store_name;
                 """
 
 search_product_name = """

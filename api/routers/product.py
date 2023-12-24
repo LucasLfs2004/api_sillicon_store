@@ -16,7 +16,7 @@ os.makedirs(upload_folder, exist_ok=True)
 
 
 @router.get("/product", tags=['Produtos'])
-def get_products():
+async def get_products():
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -35,7 +35,7 @@ def get_products():
 
 
 @router.get("/product/{limit}", tags=['Produtos'])
-def get_limited_products(limit: int):
+async def get_limited_products(limit: int):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -51,10 +51,12 @@ def get_limited_products(limit: int):
         return products
     except Exception as e:
         return e
+    finally:
+        cursor.close()
 
 
 @router.get("/product/id/{product_id}", tags=['Produtos'])
-def search_product(product_id: str):
+async def search_product(product_id: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -67,7 +69,7 @@ def search_product(product_id: str):
 
 
 @router.get("/product/name/{product_name}", tags=['Produtos'])
-def search_product(product_name: str):
+async def search_product(product_name: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -152,7 +154,7 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
 
 
 @router.delete('/product', tags=['Produtos'])
-def delete_product(id_product: str = Form()):
+async def delete_product(id_product: str = Form()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -177,7 +179,7 @@ def delete_product(id_product: str = Form()):
 
 
 @router.delete("/product/image", tags=["Produtos"])
-def delete_image(id_image: str = Form()):
+async def delete_image(id_image: str = Form()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("DELETE FROM IMAGE WHERE id = %s", (id_image,))
@@ -190,7 +192,7 @@ def delete_image(id_image: str = Form()):
 
 
 @router.post("/product/image", tags=["Produtos"])
-def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
+async def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         filenames = []
@@ -215,7 +217,7 @@ def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
 
 
 @router.post("/product/description", tags=["Produtos"])
-def create_description(description: new_description):
+async def create_description(description: new_description):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -230,7 +232,7 @@ def create_description(description: new_description):
 
 
 @router.patch("/product/description", tags=["Produtos"])
-def create_description(description: new_description):
+async def create_description(description: new_description):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -245,7 +247,7 @@ def create_description(description: new_description):
 
 
 @router.delete("/product/description", tags=["Produtos"])
-def delete_description(id_product: str = Form()):
+async def delete_description(id_product: str = Form()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(

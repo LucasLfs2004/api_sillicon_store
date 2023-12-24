@@ -1,26 +1,46 @@
 from fastapi import APIRouter
 from database.connection import mysql_connection
-from fastapi import HTTPException
-from models.models import new_account, effect_login
+from fastapi import HTTPException, Form, status, Depends
+from models.models import new_account, effect_login, UserToken
 from dependencies.token import generate_jwt_token
 import bcrypt
+from typing import Optional
 import uuid
-from requests.person import get_persons_query, get_person_id_query
+import jwt
+from dependencies import token, formatters
+from requests.person import get_persons_query, get_person_id_query, get_user_profile
+from fastapi.security import OAuth2AuthorizationCodeBearer
+import secrets
 
 router = APIRouter()
 
 
-@router.get("/person", tags=['person'])
+@router.get("/person", tags=['User'])
 def get_persons():
     cursor = mysql_connection.cursor(dictionary=True)
     cursor.execute(get_persons_query)
-    # cursor.execute("select * from person")
     person = cursor.fetchall()
     cursor.close()
     return person
 
 
-@router.post("/login", tags=['person'])
+@router.get("/person/me", tags=['User'])
+async def get_data_user(current_user: int = Depends(token.get_current_user)):
+    try:
+        print(current_user)
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(get_user_profile, (current_user,))
+        profile_data = cursor.fetchone()
+        profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
+        return profile_data
+
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.post("/login", tags=['User'])
 def login_user(login: effect_login):
     try:
         print(login)
@@ -45,7 +65,7 @@ def login_user(login: effect_login):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/create-account", tags=['person'])
+@router.post("/create-account", tags=['User'])
 def create_account(account: new_account):
     try:
         cursor = mysql_connection.cursor(dictionary=True)

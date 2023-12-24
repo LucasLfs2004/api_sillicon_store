@@ -13,7 +13,7 @@ os.makedirs(upload_folder, exist_ok=True)
 
 
 @router.get("/category", tags=["Categoria"])
-def get_categorys():
+async def get_categorys():
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM category")
@@ -27,7 +27,7 @@ def get_categorys():
 
 
 @router.post("/category", tags=['Categoria'])
-def create_category(name: str = Form(), path_img: UploadFile = File(None)):
+async def create_category(name: str = Form(), path_img: UploadFile = File(None)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         id = int.from_bytes(
@@ -62,7 +62,7 @@ def create_category(name: str = Form(), path_img: UploadFile = File(None)):
 
 
 @router.patch("/category", tags=["Categoria"])
-def update_category(old_name: str = Form(), name: str = Form(None), path_img: UploadFile = File(None)):
+async def update_category(old_name: str = Form(), name: str = Form(None), path_img: UploadFile = File(None)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -112,7 +112,7 @@ def update_category(old_name: str = Form(), name: str = Form(None), path_img: Up
 
 
 @router.delete("/category", tags=["Categoria"])
-def delete_category(name: str = Form()):
+async def delete_category(name: str = Form()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         print("Executando select")

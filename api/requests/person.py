@@ -29,3 +29,21 @@ get_person_id_query = """SELECT
                     LEFT JOIN
                         seller ON person.id = seller.id_person
                     WHERE person.email = %s"""
+
+
+get_user_profile = """
+                    SELECT
+                        person.id,
+                        person.name,
+                        person.email,
+                        person.birthday,
+                        person.phone_number,
+                        person.cpf,
+                        seller.admin as is_admin,
+                        seller.seller as is_seller,
+                        seller.id as id_seller
+                    FROM
+                        person
+                        LEFT JOIN seller ON person.id = seller.id_person
+                    WHERE
+                        person.id = %s"""

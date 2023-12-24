@@ -17,6 +17,10 @@ class new_account(BaseModel):
     password: str
 
 
+class UserToken(BaseModel):
+    user_id: str
+
+
 class new_product(BaseModel):
     owner: int
     name: str

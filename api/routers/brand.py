@@ -13,7 +13,7 @@ os.makedirs(upload_folder, exist_ok=True)
 
 
 @router.get("/brand", tags=["Marca"])
-def get_brand():
+async def get_brands():
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM BRAND")
@@ -26,10 +26,12 @@ def get_brand():
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
 
 
 @router.post("/brand", tags=['Marca'])
-def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None)):
+async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         id = int.from_bytes(
@@ -78,16 +80,17 @@ def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), brand_
         inserted_data = cursor.fetchone()
 
         # # Fechar o cursor e retornar o ID do produto
-        cursor.close()
         return {"new_category:": inserted_data}
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
 
 
 @router.patch("/brand", tags=["Marca"])
-def update_brand(old_name: str = Form(), name: str = Form(None), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None)):
+async def update_brand(old_name: str = Form(), name: str = Form(None), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -153,7 +156,7 @@ def update_brand(old_name: str = Form(), name: str = Form(None), brand_logo: Upl
 
 
 @router.put("/brand", tags=["Marca"])
-def update_brand(old_name: str = Form(), name: str = Form(), brand_logo: UploadFile = File(), brand_logo_black: UploadFile = File()):
+async def update_brand(old_name: str = Form(), name: str = Form(), brand_logo: UploadFile = File(), brand_logo_black: UploadFile = File()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -199,7 +202,7 @@ def update_brand(old_name: str = Form(), name: str = Form(), brand_logo: UploadF
 
 
 @router.delete("/brand", tags=["Marca"])
-def delete_brand(name: str = Form()):
+async def delete_brand(name: str = Form()):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM BRAND WHERE NAME = %s", (name,))
