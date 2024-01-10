@@ -7,6 +7,7 @@ import bcrypt
 from typing import Optional
 import uuid
 import jwt
+import json
 from dependencies import token, formatters
 from requests.person import get_persons_query, get_person_id_query, get_user_profile
 from fastapi.security import OAuth2AuthorizationCodeBearer
@@ -31,8 +32,9 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_user_profile, (current_user,))
         profile_data = cursor.fetchone()
-        profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
-        return profile_data
+        print(profile_data)
+        # profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
+        return json.loads(profile_data['person'])
 
     except Exception as e:
         return e

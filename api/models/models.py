@@ -53,3 +53,14 @@ class new_comment(BaseModel):
 class new_description(BaseModel):
     id_product: str
     description: str
+
+
+class new_cart(BaseModel):
+    id_person: str
+    id_product: str
+    amount: int
+
+
+class update_cart(BaseModel):
+    id: str
+    amount: int
