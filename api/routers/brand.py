@@ -54,8 +54,8 @@ async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), 
         if brand_logo is not None and brand_logo_black is not None:
             cursor.execute(
                 "INSERT INTO BRAND (id, name, brand_logo, brand_logo_black) VALUES (%s, %s, %s, %s)",
-                (id, name, str('public/brand/' + filename_brand_logo),
-                 str('public/brand/' + filename_brand_logo_black))
+                (id, name, str(filename_brand_logo),
+                 str(filename_brand_logo_black))
             )
         elif brand_logo is None and brand_logo_black is not None:
             cursor.execute(

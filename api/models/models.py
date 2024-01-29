@@ -64,3 +64,14 @@ class new_cart(BaseModel):
 class update_cart(BaseModel):
     id: str
     amount: int
+
+
+class apply_discount(BaseModel):
+    id_person: str
+    code: str
+
+
+class ship_cart(BaseModel):
+    id_person: str
+    region: str
+    cep: str
