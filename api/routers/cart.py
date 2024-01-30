@@ -1,14 +1,11 @@
-import os
 import uuid
-from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
-from dependencies.const import current_GMT
-from typing import List
+from fastapi import HTTPException, APIRouter, Form, Depends
 from database.connection import mysql_connection
-import time
 import json
 from models.models import new_cart, update_cart, apply_discount, ship_cart
 from dependencies import token
 from requests.cart import select_complete_cart
+from functions.cart import organize_response_cart
 
 router = APIRouter()
 
@@ -27,7 +24,7 @@ async def get_cart_user(id_person: str):
         return e
 
 
-@router.get("/cart", tags=['User'])
+@router.get("/cart", tags=['User', 'Carrinho'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
         print(current_user)
@@ -60,7 +57,6 @@ async def add_to_cart(new_cart: new_cart):
                        (cart['id_person'], cart['id_product']))
         data = cursor.fetchall()
 
-        print(data)
         if (len(data) > 1):
             cursor.execute(
                 "DELETE FROM cart_items WHERE id_product = %s", (cart['id_product'],))
@@ -161,62 +157,28 @@ async def clear_voucher_discount(id_person: str):
 
 
 @router.post('/cart-ship', tags=['Carrinho'])
-async def set_ship_cart(ship: ship_cart):
-    try:
-
-        return True
-    except Exception as e:
-        return e
-
-
-async def calc_list_portions(array_cart: dict, id_person: str):
+async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_current_user)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
-            "DELETE FROM portion WHERE id_cart_user = %s", (id_person,))
+            "SELECT * FROM ship_value WHERE region = %s", (ship.region,))
+        data = cursor.fetchone()
+
+        # Update da table cart_user
+        cursor.execute("UPDATE cart_user SET ship_value = %s, ship_deadline = %s, ship_cep = %s, ship_street = %s WHERE id_person = %s",
+                       (data['value'], data['deadline'], ship.cep, ship.street, current_user))
         mysql_connection.commit()
-        print('passamos do delete')
-        for i in range(array_cart['portions']):
-            total_value_items = 0
-            for item in array_cart['items']:
-                value_item = item['value']['price_now'] if item['value']['price_now'] is not None else item['value']['common_price']
-                value_item *= item['amount']
-                value_item *= (1 + item['value']['fees_credit'] / 100)
-                if i > 0:
-                    value_item *= (1 + item['value']
-                                   ['fees_monthly'] / 100) ** (i + 1)
-                total_value_items += value_item
-            often = i + 1
-            value_credit = round(total_value_items, 2)
-            value_portion = round(total_value_items / (i + 1), 2)
-            cursor.execute("INSERT INTO portion (id_cart_user, often, value_credit, value_portion) VALUES (%s, %s, %s, %s)",
-                           (id_person, often, value_credit, value_portion))
-            mysql_connection.commit()
 
-            cursor.execute('''SELECT JSON_ARRAYAGG(
-                                    JSON_OBJECT(
-                                        'often', portion.often, 'value_credit', portion.value_credit, 'value_portion', portion.value_portion
-                                    )
-                                ) AS portions
-                            from portion
-                            where
-                                id_cart_user = %s''', (id_person,))
-            portions = cursor.fetchone()
-        return json.loads(portions['portions'])
+        # Chamada da procedure
+        cursor.execute('CALL atualizar_cart_user(%s)',
+                       (current_user,))
+        mysql_connection.commit()
+
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        cart_data = cursor.fetchone()
+
+        cart = await organize_response_cart(cart=cart_data, id_person=current_user)
+        return cart
     except Exception as e:
-        print(e)
-
-
-async def organize_response_cart(cart: dict, id_person: str):
-    array_cart = json.loads(cart["cart"])
-
-    for item in array_cart['items']:
-        item['images'] = sorted(item['images'])
-
-    # Se precisar ordenar a lista de itens pelo nome do produto:
-    array_cart['items'] = sorted(
-        array_cart['items'], key=lambda x: x['name'])
-
-    array_cart['list_portions'] = await calc_list_portions(array_cart=array_cart, id_person=id_person)
-
-    return array_cart
+        return e
