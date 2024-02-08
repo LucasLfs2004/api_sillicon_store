@@ -40,11 +40,12 @@ def verify_access_token(token: str):
         # token_data = UserToken(user_id=id)
         return payload['user_id']
     except Exception as e:
+        print('error on verify_access_token')
         return e
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
-    # credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+    # credentials_exception = HTTPException(status_code=status.HTTP__UNAUTHORIZED,
     #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
 
     token = verify_access_token(token)

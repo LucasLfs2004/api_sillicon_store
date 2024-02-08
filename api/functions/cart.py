@@ -19,8 +19,17 @@ async def calc_list_portions(array_cart: dict, id_person: str):
                                    ['fees_monthly'] / 100) ** (i + 1)
                 total_value_items += value_item
             often = i + 1
-            value_credit = round(total_value_items, 2)
-            value_portion = round(total_value_items / (i + 1), 2)
+            value_credit = round(
+                (total_value_items + array_cart['ship_value']), 2)
+
+            if array_cart['discount'] != 0 and array_cart['discount'] is not None:
+                if array_cart['discount'] > 1:
+                    value_credit = value_credit - array_cart['discount']
+                else:
+                    value_credit = value_credit - \
+                        (value_credit * array_cart['discount'])
+
+            value_portion = round(value_credit / (i + 1), 2)
             cursor.execute("INSERT INTO portion (id_cart_user, often, value_credit, value_portion) VALUES (%s, %s, %s, %s)",
                            (id_person, often, value_credit, value_portion))
             mysql_connection.commit()

@@ -67,7 +67,6 @@ class update_cart(BaseModel):
 
 
 class apply_discount(BaseModel):
-    id_person: str
     code: str
 
 
@@ -75,3 +74,7 @@ class ship_cart(BaseModel):
     region: str
     cep: str
     street: str
+
+
+class id_model(BaseModel):
+    id: str

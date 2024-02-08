@@ -2,7 +2,7 @@ import uuid
 from fastapi import HTTPException, APIRouter, Form, Depends
 from database.connection import mysql_connection
 import json
-from models.models import new_cart, update_cart, apply_discount, ship_cart
+from models.models import new_cart, update_cart, apply_discount, ship_cart, id_model
 from dependencies import token
 from requests.cart import select_complete_cart
 from functions.cart import organize_response_cart
@@ -83,75 +83,132 @@ async def add_to_cart(new_cart: new_cart):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.patch("/cart-item", tags=["Carrinho"])
-async def patch_cart(cart: update_cart):
+@router.delete('/cart', tags=['Carrinho'])
+async def clear_cart(current_user: int = Depends(token.get_current_user)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
-
         cursor.execute(
-            "UPDATE cart_items SET amount = %s WHERE id like %s",
-            (cart.amount, cart.id))
+            "DELETE FROM cart_items WHERE id_person = %s", (current_user,)
+        )
         mysql_connection.commit()
-
-        cursor.execute("SELECT * FROM cart_items WHERE id = %s",
-                       (cart.id,))
-        cart_item = cursor.fetchone()
-        print(cart_item)
-        cursor.close()
-        return cart_item
-    except Exception as e:
-        return e
-
-
-@router.delete("/cart", tags=["Carrinho"])
-async def delete_description(id: str = Form()):
-    try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        print(current_user)
         cursor.execute(
-            "DELETE FROM cart_items WHERE id = %s", (id,))
+            'UPDATE cart_user SET discount = 0, discount_value = 0, product_total_value = 1, voucher = NULL, portions = 0, ship_value = 0, cart_total_value = 0, ship_cep = NULL, ship_street = null, ship_deadline = NULL WHERE id_person = %s',
+            (current_user,)
+        )
+        mysql_connection.commit()
+        cursor.execute(
+            'DELETE FROM portion WHERE id_cart_user = %s', (current_user,)
+        )
         mysql_connection.commit()
         return True
     except Exception as e:
         return e
-    finally:
+
+
+@router.patch("/cart-item", tags=["Carrinho"])
+async def patch_cart(cart_update: update_cart, current_user: int = Depends(token.get_current_user)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute(
+            "UPDATE cart_items SET amount = %s WHERE id like %s and id_person like %s",
+            (cart_update.amount, cart_update.id, current_user))
+        mysql_connection.commit()
+
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        product_data = cursor.fetchone()
+        print(product_data)
+
+        cart = await organize_response_cart(cart=product_data, id_person=current_user)
+        print(cart)
+
+        return cart
+    except Exception as e:
+        return e
+
+
+@router.delete("/cart-item/{id}", tags=["Carrinho"])
+async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_current_user)):
+    try:
+        print(current_user)
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            "DELETE FROM cart_items WHERE id = %s and id_person = %s",
+            (id, current_user))
+        mysql_connection.commit()
+
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        product_data = cursor.fetchone()
+        print(product_data)
+
+        cart = await organize_response_cart(cart=product_data, id_person=current_user)
+        print(cart)
+
         cursor.close()
+        return cart
+
+    except Exception as e:
+        return e
 
 
 @router.post("/cart-discount", tags=['Carrinho'])
-async def apply_discount_in_cart(discount: apply_discount):
+async def apply_discount_in_cart(code: apply_discount, current_user: int = Depends(token.get_current_user)):
     try:
+        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
-            'SELECT * FROM discount_list WHERE code = %s', (discount.code,))
+            'SELECT * FROM discount_list WHERE code = %s', (code.code,))
         code_data = cursor.fetchone()
+        print(code_data)
         # return code_data
         if (code_data is None):
             return "Cupom Inválido"
         else:
             cursor.execute('UPDATE cart_user SET voucher = %s WHERE id_person = %s',
-                           (discount.code, discount.id_person))
+                           (code.code, current_user))
             mysql_connection.commit()
             print('chamando a procedure')
             cursor.execute('CALL atualizar_cart_user(%s)',
-                           (discount.id_person,))
+                           (current_user,))
             mysql_connection.commit()
-            return 'DEU TUDO CERTO'
+
+            # Realizar consulta para obter os dados inseridos
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        product_data = cursor.fetchone()
+        print(product_data)
+
+        cart = await organize_response_cart(cart=product_data, id_person=current_user)
+        print(cart)
+
+        return cart
 
     except Exception as e:
         return e
 
 
 @router.delete("/cart-discount", tags=['Carrinho'])
-async def clear_voucher_discount(id_person: str):
+async def clear_voucher_discount(current_user: int = Depends(token.get_current_user)):
     try:
+        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
-            'UPDATE cart_user SET voucher = NULL WHERE id_person = %s', (id_person,))
+            'UPDATE cart_user SET voucher = NULL WHERE id_person = %s', (current_user,))
         cursor.execute('CALL atualizar_cart_user(%s)',
-                       (id_person,))
+                       (current_user,))
         mysql_connection.commit()
-        mysql_connection.commit()
-        return True
+
+        # Realizar consulta para obter os dados inseridos
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        product_data = cursor.fetchone()
+
+        cart = await organize_response_cart(cart=product_data, id_person=current_user)
+
+        return cart
     except Exception as e:
         return e
 
