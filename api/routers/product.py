@@ -7,7 +7,7 @@ from database.connection import mysql_connection
 import time
 import json
 from models.models import new_description
-from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products
+from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
 
 router = APIRouter()
 
@@ -258,3 +258,29 @@ async def delete_description(id_product: str = Form()):
         return e
     finally:
         cursor.close()
+
+
+@router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
+async def get_products_specif_brand(brand_id: str):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            get_limit_products_specific_brand, (brand_id, 40)
+        )
+        data = cursor.fetchall()
+        products = []
+
+        for product in data:
+            dict_product = json.loads(product["product"])
+            dict_product["images"] = sorted(dict_product["images"])
+            products.append(dict_product)
+
+        cursor.execute(
+            "select name as brand_name, brand_logo, brand_logo_black from brand where id = %s", (brand_id,))
+        brand_obj = cursor.fetchone()
+        print(brand_obj)
+        brand_obj['products'] = products
+        print(brand_obj)
+        return brand_obj
+    except Exception as e:
+        return e
