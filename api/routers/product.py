@@ -137,12 +137,15 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
         )
         mysql_connection.commit()
 
-        print("Entrando no select gigante")
+        # print("Entrando no select gigante")
+        # print(product['id'])
 
         # Realizar consulta para obter os dados inseridos
         cursor.execute(get_product_id,
                        (product['id'],))
-        product_data = cursor.fetchall()
+        product_data = cursor.fetchone()
+        # print('realizei o select')
+        # print(product_data)
         cursor.close()
         return json.loads(product_data['product'])
     except Exception as e:
