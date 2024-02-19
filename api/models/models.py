@@ -61,6 +61,11 @@ class new_cart(BaseModel):
     amount: int
 
 
+class new_cart_item(BaseModel):
+    id_product: str
+    amount: int
+
+
 class update_cart(BaseModel):
     id: str
     amount: int

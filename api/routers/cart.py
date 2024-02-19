@@ -2,7 +2,7 @@ import uuid
 from fastapi import HTTPException, APIRouter, Form, Depends
 from database.connection import mysql_connection
 import json
-from models.models import new_cart, update_cart, apply_discount, ship_cart, id_model
+from models.models import new_cart, update_cart, apply_discount, ship_cart, id_model, new_cart_item
 from dependencies import token
 from requests.cart import select_complete_cart
 from functions.cart import organize_response_cart
@@ -76,6 +76,48 @@ async def add_to_cart(new_cart: new_cart):
         product_data = cursor.fetchone()
 
         cart = await organize_response_cart(cart=product_data, id_person=new_cart.id_person)
+
+        return cart
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/cart-item", tags=['Carrinho'])
+async def add_to_cart(new_cart: new_cart_item, current_user: int = Depends(token.get_current_user)):
+    cart = {
+        'id': int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32),
+        'id_product': new_cart.id_product,
+        'amount': new_cart.amount,
+    }
+    try:
+        print(current_user)
+        # Conectar ao banco de dados
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT * FROM cart_items WHERE id_person = %s and id_product = %s",
+                       (current_user, cart['id_product']))
+        data = cursor.fetchall()
+
+        if (len(data) > 1):
+            cursor.execute(
+                "DELETE FROM cart_items WHERE id_product = %s", (cart['id_product'],))
+            mysql_connection.commit()
+        elif (len(data) == 1):
+            cursor.execute(
+                "UPDATE cart_items SET amount = %s WHERE id = %s", (cart['amount'], data[0]['id']))
+            mysql_connection.commit()
+        if (len(data) != 1):
+            cursor.execute("INSERT INTO cart_items (id, id_person, id_product, amount) VALUES (%s, %s, %s, %s)",
+                           (cart['id'], current_user, cart["id_product"], cart['amount']))
+            mysql_connection.commit()
+
+        # Realizar consulta para obter os dados inseridos
+        cursor.execute(select_complete_cart,
+                       (current_user,))
+        product_data = cursor.fetchone()
+
+        cart = await organize_response_cart(cart=product_data, id_person=current_user)
 
         return cart
     except Exception as e:
