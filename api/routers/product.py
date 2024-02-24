@@ -7,7 +7,7 @@ from database.connection import mysql_connection
 import time
 import json
 from models.models import new_description
-from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand, new_get_product_id, new_get_products_limit
+from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
 from functions.product import organize_images_from_products
 
 router = APIRouter()
@@ -40,7 +40,7 @@ async def get_limited_products(limit: int):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
-        cursor.execute(new_get_products_limit, (limit,))
+        cursor.execute(get_limit_products, (limit,))
         data = cursor.fetchone()
         # print(data)
         data = json.loads(data['products'])
@@ -61,13 +61,16 @@ async def search_product(product_id: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
+        print(cursor)
+
         print(product_id)
         # print(get_product_id)
         # return get_product_id
 
-        cursor.execute(new_get_product_id, (product_id,))
+        cursor.execute(get_product_id, (product_id, ))
         print('passei pelo cursor')
         data = cursor.fetchone()
+        # return data
         product = json.loads(data["product"])
         print(data)
         images = organize_images_from_products(product=product)
@@ -88,15 +91,15 @@ async def search_product(product_name: str):
 
         cursor.execute(search_product_name,
                        (search, search))
-        data = cursor.fetchall()
-        products = []
+        data = cursor.fetchone()
+        # print(data)
+        data = json.loads(data['products'])
 
         for product in data:
-            dict_product = json.loads(product["product"])
-            dict_product["images"] = sorted(dict_product["images"])
-            products.append(dict_product)
+            images = organize_images_from_products(product=product)
+            product['images'] = images
 
-        return products
+        return data
     except Exception as e:
         return e
 
