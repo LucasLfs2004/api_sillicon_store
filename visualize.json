@@ -1,218 +1,52 @@
-[
-  {
-    "id": "1197754295",
-    "name": "iPhone 15 Pro Apple (512GB) Titânio Natural, Tela de 6,1\", 5G e Câmera de 48MP",
-    "brand": {
-      "logo": "1701967705.244529appleLogo.svg",
-      "name": "Apple",
-      "logo_black": "1701967705.24575appleLogoBlack.svg"
-    },
-    "model": "iPhone 15 - PRO - 512",
-    "stock": 55,
-    "value": {
-      "portions": 10,
-      "price_now": null,
-      "fees_credit": 4.0,
-      "common_price": 9159.99,
-      "fees_monthly": 2.1
-    },
-    "active": 1,
-    "images": [
-      "1702917824.8963342iphone15pro_5.jpeg",
-      "1702917824.8984802iphone15pro_6.jpeg",
-      "1702917824.89391iphone15pro_4.jpeg",
-      "1702917824.881082iphone15pro_2.jpeg",
-      "1702917824.9114602iphone15pro_7.jpeg",
-      "1702917824.864584iphone15pro_1.jpeg",
-      "1702917824.8915389iphone15pro_3.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Smartphone",
-    "featured": 1,
-    "warranty": 24,
-    "description": { "desc_html": null, "updated_at": null }
+{
+  "id": "1197754295",
+  "name": "iPhone 15 Pro Apple (512GB) Titânio Natural, Tela de 6,1\", 5G e Câmera de 48MP",
+  "brand": {
+    "logo": "1701967705.244529appleLogo.svg",
+    "name": "Apple",
+    "logo_black": "1701967705.24575appleLogoBlack.svg"
   },
-  {
-    "id": "1301611670",
-    "name": "Notebook MacBook Pro Apple, Tela Retina 14\", Chip M3 Pro, 18GB RAM, Prateado",
-    "brand": {
-      "logo": "1701967705.244529appleLogo.svg",
-      "name": "Apple",
-      "logo_black": "1701967705.24575appleLogoBlack.svg"
-    },
-    "model": "MRX63BZ/A",
-    "stock": 32,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 2.0,
-      "common_price": 14999.99,
-      "fees_monthly": 1.0
-    },
-    "active": 1,
-    "images": [
-      "1707435524.912864macbook-pro-m3-pro-1.jpeg",
-      "1707435524.9167528macbook-pro-m3-pro-2.jpeg",
-      "1707435524.921124macbook-pro-m3-pro-4.jpeg",
-      "1707435524.9191308macbook-pro-m3-pro-3.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Notebook",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
+  "model": "iPhone 15 - PRO - 512",
+  "stock": 55,
+  "value": {
+    "portions": 10,
+    "price_now": null,
+    "fees_credit": 4.0,
+    "common_price": 9159.99,
+    "fees_monthly": 2.1
   },
-  {
-    "id": "1738295407",
-    "name": "Apple iPad Pro 12.9\" 6ª Geração, Wi-Fi, 128GB, Cinza Espacial",
-    "brand": {
-      "logo": "1701967705.244529appleLogo.svg",
-      "name": "Apple",
-      "logo_black": "1701967705.24575appleLogoBlack.svg"
-    },
-    "model": "MNXP3BZ/A",
-    "stock": 50,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 1.0,
-      "common_price": 8699.99,
-      "fees_monthly": 3.0
-    },
-    "active": 1,
-    "images": [
-      "1708129366.016474iPad-pro-12pol-2.jpeg",
-      "1708129366.0176818iPad-pro-12pol-3.jpeg",
-      "1708129366.018751iPad-pro-12pol-4.jpeg",
-      "1708129366.014598iPad-pro-12pol-1.jpeg",
-      "1708129366.0196888iPad-pro-12pol-5.jpeg"
+  "active": 1,
+  "images": [
+    { "path": "1702917824.8963342iphone15pro_5.jpeg", "index": 5 },
+    { "path": "1702917824.8984802iphone15pro_6.jpeg", "index": 6 },
+    { "path": "1702917824.89391iphone15pro_4.jpeg", "index": 4 },
+    { "path": "1702917824.881082iphone15pro_2.jpeg", "index": 2 },
+    { "path": "1702917824.9114602iphone15pro_7.jpeg", "index": 7 },
+    { "path": "1702917824.864584iphone15pro_1.jpeg", "index": 1 },
+    { "path": "1702917824.8915389iphone15pro_3.jpeg", "index": 3 }
+  ],
+  "rating": {
+    "comments": [
+      {
+        "created_at": "2024-02-19 14:46:54.000000",
+        "id_comment": "1297754295",
+        "title_text": "Amei!",
+        "rating_value": 4.5,
+        "text_comment": "Excelente produto, atendeu todas as minhas expectativas"
+      },
+      {
+        "created_at": "2024-02-23 11:38:46.000000",
+        "id_comment": "1397754295",
+        "title_text": "Celular Excelente",
+        "rating_value": 5.0,
+        "text_comment": "O produto é de qualidade Apple, fnciona muito bem, a câmera é incrível e consigo tirar ótimas fotos com ele, a bateria poderia durar um pouco mais, mas acho que é por causa do tamanho do celular "
+      }
     ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Smartphone",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
+    "rating_value": 4.75,
+    "amount_rating": 2
   },
-  {
-    "id": "1973491187",
-    "name": "Iphone 14 Plus Apple, 256GB, Câmera Dupla 12MP + Selfie 12MP, Tela de 6.7\", Azul - MQ583BR/A",
-    "brand": {
-      "logo": "1701967705.244529appleLogo.svg",
-      "name": "Apple",
-      "logo_black": "1701967705.24575appleLogoBlack.svg"
-    },
-    "model": "MQ583BR/A",
-    "stock": 50,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 0.5,
-      "common_price": 4599.99,
-      "fees_monthly": 2.0
-    },
-    "active": 1,
-    "images": [
-      "1708128547.840339iphone-14-plus-3.jpeg",
-      "1708128547.837899iphone-14-plus-2.jpeg",
-      "1708128547.8347719iphone-14-plus-1.jpeg",
-      "1708128547.842051iphone-14-plus-4.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Smartphone",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
-  },
-  {
-    "id": "2975938559",
-    "name": "Smartphone iPhone 13, 128GB, Meia-noite, Tela 6.1, A15 Bionic, Câmera Dupla 12MP, iOS",
-    "brand": {
-      "logo": "1701967705.244529appleLogo.svg",
-      "name": "Apple",
-      "logo_black": "1701967705.24575appleLogoBlack.svg"
-    },
-    "model": "MLPF3BR/A",
-    "stock": 5,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 1.0,
-      "common_price": 3699.99,
-      "fees_monthly": 3.0
-    },
-    "active": 1,
-    "images": [
-      "1708131079.4720268iPad-pro-12pol-5.jpeg",
-      "1708131079.4759061Apple-iPhone-13-128GB-2.jpeg",
-      "1708131079.474545Apple-iPhone-13-128GB-1.jpeg",
-      "1708131079.478608Apple-iPhone-13-128GB-4.jpeg",
-      "1708131079.4773571Apple-iPhone-13-128GB-3.jpeg",
-      "1708131079.4682932iPad-pro-12pol-3.jpeg",
-      "1708131079.4799309Apple-iPhone-13-128GB-5.jpeg",
-      "1708131079.481091Apple-iPhone-13-128GB-6.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Smartphone",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
-  },
-  {
-    "id": "3592125269",
-    "name": " Console Xbox Series X + Forza Horizon 5, Edição Premium, Microsoft - RRT-00057",
-    "brand": {
-      "logo": "1705363680.967099xboxLogo.svg",
-      "name": "Xbox",
-      "logo_black": "1705363680.967749xboxLogoBlack.svg"
-    },
-    "model": null,
-    "stock": 43,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 3.0,
-      "common_price": 4299.99,
-      "fees_monthly": 1.4
-    },
-    "active": 1,
-    "images": [
-      "1705529758.8960488xbox-series-x-2.jpeg",
-      "1705529758.893436xbox-series-x-1.jpeg",
-      "1705529758.8977149xbox-series-x-3.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Videogame",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
-  },
-  {
-    "id": "4067477189",
-    "name": " Console Microsoft Xbox Series S, 512GB, Branco - RRS-00006",
-    "brand": {
-      "logo": "1705363680.967099xboxLogo.svg",
-      "name": "Xbox",
-      "logo_black": "1705363680.967749xboxLogoBlack.svg"
-    },
-    "model": null,
-    "stock": 22,
-    "value": {
-      "portions": 12,
-      "price_now": null,
-      "fees_credit": 3.0,
-      "common_price": 1799.99,
-      "fees_monthly": 1.4
-    },
-    "active": 1,
-    "images": [
-      "1705529803.2276301xbox-series-s-3.jpeg",
-      "1705529803.224939xbox-series-s-1.jpeg",
-      "1705529803.226507xbox-series-s-2.jpeg"
-    ],
-    "rating": { "rating_value": 0.0, "amount_rating": 0 },
-    "category": "Videogame",
-    "featured": 1,
-    "warranty": 12,
-    "description": { "desc_html": null, "updated_at": null }
-  }
-]
+  "category": "Smartphone",
+  "featured": 1,
+  "warranty": 24,
+  "description": { "desc_html": null, "updated_at": null }
+}
