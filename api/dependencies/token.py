@@ -39,6 +39,10 @@ def verify_access_token(token: str):
         # id: str = payload.get("user_id")
         # token_data = UserToken(user_id=id)
         return payload['user_id']
+    except jwt.ExpiredSignatureError:
+        # Token expirado
+        raise HTTPException(status_code=401, detail=str('Token is expired'))
+        # return {'error': 'Token de acesso expirado', 'status_code': 401}
     except Exception as e:
         print('error on verify_access_token')
         return e

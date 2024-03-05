@@ -83,3 +83,7 @@ class ship_cart(BaseModel):
 
 class id_model(BaseModel):
     id: str
+
+
+class id_ship (BaseModel):
+    id: str

@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from database.connection import mysql_connection
 from fastapi import HTTPException, Form, status, Depends
-from models.models import new_account, effect_login, UserToken
+from models.models import new_account, effect_login, UserToken, id_ship
 from dependencies.token import generate_jwt_token
 import bcrypt
 from typing import Optional
@@ -36,6 +36,25 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         # profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
         return json.loads(profile_data['person'])
 
+    except Exception as e:
+        return e
+    finally:
+        cursor.close()
+
+
+@router.post("/principal-ship", tags=['User'])
+async def get_data_user(principal_ship: id_ship, current_user: int = Depends(token.get_current_user)):
+    try:
+        print(current_user)
+        print(principal_ship.id)
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            'UPDATE person SET principal_ship_id = %s WHERE id = %s', (principal_ship.id, current_user))
+        mysql_connection.commit()
+        return True
+        cursor.execute(get_user_profile, (current_user,))
+        profile_data = cursor.fetchone()
+        return json.loads(profile_data['person'])
     except Exception as e:
         return e
     finally:
