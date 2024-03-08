@@ -1,52 +1,32 @@
 {
-  "id": "1197754295",
-  "name": "iPhone 15 Pro Apple (512GB) Titânio Natural, Tela de 6,1\", 5G e Câmera de 48MP",
-  "brand": {
-    "logo": "1701967705.244529appleLogo.svg",
-    "name": "Apple",
-    "logo_black": "1701967705.24575appleLogoBlack.svg"
+  "__typename": "Episode",
+  "channel": {
+    "__typename": "Channel",
+    "codename": "criadosolto",
+    "cover": "https://api.olapodcasts.com/img/059c4b05-fd9d-4edc-9fa7-c133bf1fc806/channel10180/1200x600/cacb5701ae2a16d1c55d0633abd50c56e.png",
+    "flag": "original",
+    "following": false,
+    "id": 10180,
+    "main_category": { "__typename": "MainCategory", "id": 3 },
+    "name": "Criado Solto",
+    "original": true,
+    "premium": false,
+    "thumbnail": "https://api.olapodcasts.com/img/059c4b05-fd9d-4edc-9fa7-c133bf1fc806/channel10180/200x200/ta5e4ae9eabe27a412c0d5788454ace69.png",
+    "thumbnailHigh": "https://api.olapodcasts.com/img/059c4b05-fd9d-4edc-9fa7-c133bf1fc806/channel10180/600x600/ta5e4ae9eabe27a412c0d5788454ace69.png"
   },
-  "model": "iPhone 15 - PRO - 512",
-  "stock": 55,
-  "value": {
-    "portions": 10,
-    "price_now": null,
-    "fees_credit": 4.0,
-    "common_price": 9159.99,
-    "fees_monthly": 2.1
-  },
-  "active": 1,
-  "images": [
-    { "path": "1702917824.8963342iphone15pro_5.jpeg", "index": 5 },
-    { "path": "1702917824.8984802iphone15pro_6.jpeg", "index": 6 },
-    { "path": "1702917824.89391iphone15pro_4.jpeg", "index": 4 },
-    { "path": "1702917824.881082iphone15pro_2.jpeg", "index": 2 },
-    { "path": "1702917824.9114602iphone15pro_7.jpeg", "index": 7 },
-    { "path": "1702917824.864584iphone15pro_1.jpeg", "index": 1 },
-    { "path": "1702917824.8915389iphone15pro_3.jpeg", "index": 3 }
-  ],
-  "rating": {
-    "comments": [
-      {
-        "created_at": "2024-02-19 14:46:54.000000",
-        "id_comment": "1297754295",
-        "title_text": "Amei!",
-        "rating_value": 4.5,
-        "text_comment": "Excelente produto, atendeu todas as minhas expectativas"
-      },
-      {
-        "created_at": "2024-02-23 11:38:46.000000",
-        "id_comment": "1397754295",
-        "title_text": "Celular Excelente",
-        "rating_value": 5.0,
-        "text_comment": "O produto é de qualidade Apple, fnciona muito bem, a câmera é incrível e consigo tirar ótimas fotos com ele, a bateria poderia durar um pouco mais, mas acho que é por causa do tamanho do celular "
-      }
-    ],
-    "rating_value": 4.75,
-    "amount_rating": 2
-  },
-  "category": "Smartphone",
-  "featured": 1,
-  "warranty": 24,
-  "description": { "desc_html": null, "updated_at": null }
+  "content": "https://api.olapodcasts.com/cms/episode/1dca888b-32f4-4102-926b-df3332b8dff6/medium/8363.m3u8",
+  "description": "Chamar vinho de fruta de vinho? A culpa não é minha, a culpa é de Pedro Álvares Cabral. Nesse episódio eu conto um pouco sobre as origens da palavra “vinho”. ",
+  "download": "https://api.olapodcasts.com/cms/episode/1dca888b-32f4-4102-926b-df3332b8dff6/download_medium/8363.mp3",
+  "duration": 1469,
+  "external": false,
+  "id": 2043608,
+  "original": true,
+  "play_count": 12,
+  "premium": false,
+  "publishDate": 1707934980,
+  "rating": "L",
+  "restricted": false,
+  "thumbnail": "https://api.olapodcasts.com/img/a2367c820bcd34aa5f309d74c276ba38/episode2043608/200x200/thumb.png",
+  "thumbnailHigh": "https://api.olapodcasts.com/img/a2367c820bcd34aa5f309d74c276ba38/episode2043608/600x600/thumb.png",
+  "title": "#122 - A Culpa é do Cabral"
 }
