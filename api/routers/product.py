@@ -130,15 +130,15 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
             (str(uuid.uuid4()), product['id'], float(price), int(portions), float(fees_monthly), float(fees_credit)))
 
         # Fechar o cursor e retornar o ID do produto
-        for file in files:
+        for index, file in enumerate(files):
             filename = str(time.time()) + file.filename.replace(' ', '_')
             filenames.append(filename)
             file_path = os.path.join(upload_folder, filename)
             with open(file_path, "wb") as f:
                 f.write(file.file.read())
             cursor.execute(
-                "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
-                (str(uuid.uuid4()), product['id'], filename)
+                "INSERT INTO image (id, id_product, path, index_image) VALUES (%s, %s, %s, %s)",
+                (str(uuid.uuid4()), product['id'], filename, index)
             )
         # print(filenames)
 
