@@ -1,18 +1,11 @@
 from fastapi import APIRouter
 from database.connection import mysql_connection
 from fastapi import HTTPException, Form, status, Depends
-from models.models import new_account, effect_login, UserToken
-from dependencies.token import generate_jwt_token
-import bcrypt
-from typing import Optional
-import uuid
-import jwt
 import json
-from dependencies import token, formatters
+from dependencies import token
 from requests.seller import get_seller_data
-from fastapi.security import OAuth2AuthorizationCodeBearer
-import secrets
 from functions.product import organize_images_from_products
+from models.seller import offer_product
 
 router = APIRouter()
 
@@ -40,6 +33,20 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
             images = organize_images_from_products(product=product)
             product['images'] = images
         return data
+
+    except Exception as e:
+        print(e)
+        return e
+
+
+@router.post("/seller/product/offer", tags=['Seller'])
+async def change_value_product(infos: offer_product, current_user: int = Depends(token.get_current_user)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            'UPDATE value_product SET price_now = %s WHERE id_product = %s', (infos.new_price, infos.id_product))
+        mysql_connection.commit()
+        return True
 
     except Exception as e:
         print(e)
