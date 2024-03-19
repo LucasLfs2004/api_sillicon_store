@@ -12,6 +12,7 @@ from dependencies import token, formatters
 from requests.seller import get_seller_data
 from fastapi.security import OAuth2AuthorizationCodeBearer
 import secrets
+from functions.product import organize_images_from_products
 
 router = APIRouter()
 
@@ -32,10 +33,13 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_seller_data, (current_user,))
         profile_data = cursor.fetchone()
-        print(profile_data)
-        # profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
         cursor.close()
-        return json.loads(profile_data['seller'])
+        data = json.loads(profile_data['seller'])
+
+        for product in data['products_from_seller']:
+            images = organize_images_from_products(product=product)
+            product['images'] = images
+        return data
 
     except Exception as e:
         print(e)
