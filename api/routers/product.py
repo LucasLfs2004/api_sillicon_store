@@ -1,11 +1,12 @@
 import os
 import uuid
-from fastapi import HTTPException, APIRouter, UploadFile, File, Form
+from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
 from dependencies.const import current_GMT
 from typing import List
 from database.connection import mysql_connection
 import time
 import json
+from dependencies import token
 from models.models import new_description
 from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
 from functions.product import organize_images_from_products
@@ -133,15 +134,15 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
             (str(uuid.uuid4()), product['id'], float(price), int(portions), float(fees_monthly), float(fees_credit)))
 
         # Fechar o cursor e retornar o ID do produto
-        for file in files:
+        for index, file in enumerate(files):
             filename = str(time.time()) + file.filename.replace(' ', '_')
             filenames.append(filename)
             file_path = os.path.join(upload_folder, filename)
             with open(file_path, "wb") as f:
                 f.write(file.file.read())
             cursor.execute(
-                "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
-                (str(uuid.uuid4()), product['id'], filename)
+                "INSERT INTO image (id, id_product, path, index_image) VALUES (%s, %s, %s, %s)",
+                (str(uuid.uuid4()), product['id'], filename, index)
             )
         # print(filenames)
 
@@ -168,6 +169,33 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
+
+
+@router.delete('/product/{id_product}', tags=['Produtos'])
+async def delete_product(id_product: str, current_user: int = Depends(token.get_current_user)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute(
+            "SELECT image.path FROM image WHERE image.id_product LIKE %s", (
+                id_product,)
+        )
+        data = cursor.fetchall()
+        print(data)
+        cursor.execute("DELETE FROM product where id LIKE %s", (id_product,))
+        mysql_connection.commit()
+
+        for filename in data:
+            filename_img = os.path.join(filename["path"])
+            print(filename)
+            print(filename_img)
+            os.remove(filename_img)
+
+        cursor.close()
+        return True
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete('/product', tags=['Produtos'])
