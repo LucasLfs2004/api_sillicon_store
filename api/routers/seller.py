@@ -5,7 +5,8 @@ import json
 from dependencies import token
 from requests.seller import get_seller_data
 from functions.product import organize_images_from_products
-from models.seller import offer_product
+from models.seller import offer_product, description_product
+import uuid
 
 router = APIRouter()
 
@@ -50,4 +51,24 @@ async def change_value_product(infos: offer_product, current_user: int = Depends
 
     except Exception as e:
         print(e)
+        return e
+
+
+@router.post("/seller/product/description", tags=['Seller'])
+async def set_description_product(description: description_product, current_user: int = Depends(token.get_current_user)):
+    try:
+        id = int.from_bytes(
+            uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
+        cursor = mysql_connection.cursor(dictionary=True)
+        print(description)
+        print(id)
+        cursor.execute(
+            'INSERT INTO description_product (id_description, id_product, description_html) VALUES (%s, %s, %s)', (id, description.id_product, description.description))
+        mysql_connection.commit()
+        cursor.close()
+        return True
+
+    except Exception as e:
+        print(e)
+        print('ERROR')
         return e
