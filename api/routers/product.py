@@ -107,7 +107,7 @@ async def search_product(product_name: str):
 
 @router.post("/product", tags=['Produtos'])
 async def create_product(owner: str = Form(), name: str = Form(), brand_id: str = Form(), category_id: str = Form(),
-                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), files: List[UploadFile] = File(...)):
+                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...)):
     filenames = []
     # time_stamp = calendar.timegm(current_GMT)
     product = {
@@ -151,6 +151,11 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
             (product['id'], product['id'], int(0), int(0))
         )
         mysql_connection.commit()
+
+        if description is not None:
+            cursor.execute('INSERT INTO description_product (id_description, id_product, description_html) VALUES (%s, %s, %s)',
+                           (int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32), description.id_product, description.description))
+            mysql_connection.commit()
 
         # print("Entrando no select gigante")
         # print(product['id'])

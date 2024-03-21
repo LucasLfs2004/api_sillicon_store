@@ -38,7 +38,7 @@ def verify_access_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         # id: str = payload.get("user_id")
         # token_data = UserToken(user_id=id)
-        return payload['user_id']
+        return payload
     except jwt.ExpiredSignatureError:
         # Token expirado
         raise HTTPException(status_code=401, detail=str('Token is expired'))
@@ -49,6 +49,16 @@ def verify_access_token(token: str):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    # credentials_exception = HTTPException(status_code=status.HTTP__UNAUTHORIZED,
+    #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
+
+    token = verify_access_token(token)
+
+    # user = db.query(models.User).filter(models.User.id == token.id).first()
+    return token['user_id']
+
+
+def get_current_seller(token: str = Depends(oauth2_scheme)):
     # credentials_exception = HTTPException(status_code=status.HTTP__UNAUTHORIZED,
     #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
 

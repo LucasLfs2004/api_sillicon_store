@@ -76,7 +76,8 @@ def login_user(login: effect_login):
 
         if bcrypt.checkpw(login.password.encode("utf-8"), person["password"].encode("utf-8")):
             person.pop("password", None)
-            token = generate_jwt_token({'user_id': person["id"]})
+            token = generate_jwt_token(
+                {'user_id': person["id"], 'seller_id': person['id_seller']})
             return {"access_token": token,
                     "person": person}
         else:
