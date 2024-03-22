@@ -50,11 +50,6 @@ class new_comment(BaseModel):
     rating: float
 
 
-class new_description(BaseModel):
-    id_product: str
-    description: str
-
-
 class new_cart(BaseModel):
     id_person: str
     id_product: str

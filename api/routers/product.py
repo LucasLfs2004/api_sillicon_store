@@ -7,7 +7,7 @@ from database.connection import mysql_connection
 import time
 import json
 from dependencies import token
-from models.models import new_description
+from models.product import update_product_model, new_description
 from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
 from functions.product import organize_images_from_products
 
@@ -106,13 +106,12 @@ async def search_product(product_name: str):
 
 
 @router.post("/product", tags=['Produtos'])
-async def create_product(owner: str = Form(), name: str = Form(), brand_id: str = Form(), category_id: str = Form(),
-                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...)):
+async def create_product(name: str = Form(), brand_id: str = Form(), category_id: str = Form(),
+                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...), user=Depends(token.get_current_seller)):
     filenames = []
     # time_stamp = calendar.timegm(current_GMT)
     product = {
         'id': int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32),
-        'owner': owner,
         'active': True,
         'featured': bool(featured),
         'name': name,
@@ -127,7 +126,7 @@ async def create_product(owner: str = Form(), name: str = Form(), brand_id: str 
         cursor = mysql_connection.cursor(dictionary=True)
 
         cursor.execute("INSERT INTO product (id, seller_id, name, brand_id, category_id, stock, warranty, active, featured, model) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                       (product['id'], product['owner'], product['name'], product['brand_id'], product['category_id'], product['stock'], product['warranty'], product['active'], product['featured'], product['model']))
+                       (product['id'], user['seller_id'], product['name'], product['brand_id'], product['category_id'], product['stock'], product['warranty'], product['active'], product['featured'], product['model']))
         mysql_connection.commit()
         cursor.execute(
             "INSERT INTO value_product (id, id_product, common_price, portions, fees_monthly, fees_credit) VALUES (%s, %s, %s, %s, %s, %s)",
@@ -187,11 +186,14 @@ async def delete_product(id_product: str, current_user: int = Depends(token.get_
         )
         data = cursor.fetchall()
         print(data)
-        cursor.execute("DELETE FROM product where id LIKE %s", (id_product,))
+        print(id_product)
+        cursor.execute(
+            "DELETE FROM product WHERE product.id = %s", (id_product,))
         mysql_connection.commit()
 
+        print('entrando no for')
         for filename in data:
-            filename_img = os.path.join(filename["path"])
+            filename_img = os.path.join(upload_folder + "/" + filename["path"])
             print(filename)
             print(filename_img)
             os.remove(filename_img)
@@ -223,6 +225,22 @@ async def delete_product(id_product: str = Form()):
             print(filename_img)
             os.remove(filename_img)
 
+        return True
+    except Exception as e:
+        return e
+
+
+@router.put('/product', tags=['Produtos'])
+async def update_product(product: update_product_model, user=Depends(token.get_current_seller)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute('UPDATE product SET name = %s, brand_id = %s, category_id = %s, stock = %s, warranty = %s, active = %s, model = %s, featured = %s where id = %s and seller_id = %s',
+                       (product.name, product.brand, product.category, product.stock, product.warranty, product.active, product.model, product.featured, product.id, user['seller_id']))
+        mysql_connection.commit()
+
+        cursor.execute('UPDATE value_product SET common_price = %s, portions = %s, fees_monthly = %s, fees_credit = %s WHERE id_product = %s',
+                       (product.price, product.portions, product.fees_monthly, product.fees_credit, product.id))
+        mysql_connection.commit()
         return True
     except Exception as e:
         return e

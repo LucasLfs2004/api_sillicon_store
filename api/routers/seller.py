@@ -20,7 +20,7 @@ router = APIRouter()
 #     return person
 
 
-@router.get("/seller/me", tags=['Seller'])
+@router.get("/seller/me", tags=['Vendedor'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
         print(current_user)
@@ -40,7 +40,7 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         return e
 
 
-@router.patch("/seller/product/offer", tags=['Seller'])
+@router.patch("/seller/product/offer", tags=['Vendedor'])
 async def change_value_product(infos: offer_product, current_user: int = Depends(token.get_current_seller)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
@@ -54,7 +54,7 @@ async def change_value_product(infos: offer_product, current_user: int = Depends
         return e
 
 
-@router.post("/seller/product/description", tags=['Seller'])
+@router.post("/seller/product/description", tags=['Vendedor'])
 async def set_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):
     try:
         id = int.from_bytes(
@@ -75,7 +75,7 @@ async def set_description_product(description: description_product, current_user
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.patch("/seller/product/description", tags=['Seller'])
+@router.patch("/seller/product/description", tags=['Vendedor'])
 async def patch_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):
     try:
         print(current_user)
