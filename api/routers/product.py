@@ -227,7 +227,10 @@ async def delete_product(id_product: str = Form()):
 
         return True
     except Exception as e:
-        return e
+        print('ERROR: ' + e)
+        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put('/product', tags=['Produtos'])
@@ -282,6 +285,72 @@ async def upload_images(id_product: str = Form(), files: List[UploadFile] = File
         return e
     finally:
         cursor.close()
+
+
+@router.patch("/product/image", tags=["Produtos"])
+async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = File(default=[]), files_to_delete: List[str] = Form(default=[]), indexed_files: List[str] = Form(default=[])):
+    try:
+        entrada = {'NEW_FILES': new_files,
+                   "ID_PRODUCT": id_product,
+                   'FILES_TO_DELETE': files_to_delete,
+                   'FILES_TO_KEEP': indexed_files
+                   }
+        print(entrada)
+
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        print('entrando no for')
+
+        # Exclusão das imagens
+        for filename in files_to_delete:
+            print(filename)
+            cursor.execute("SELECT * FROM IMAGE WHERE path = %s", (filename,))
+            filename_db = cursor.fetchone()
+
+            if filename_db is not None:
+                cursor.execute(
+                    "DELETE FROM image WHERE image.path = %s", (filename,))
+                mysql_connection.commit()
+                print('passei do cursor de delete')
+
+                filename_img = os.path.join(upload_folder + "/" + filename)
+                print(filename)
+                print(filename_img)
+                os.remove(filename_img)
+        ##########################
+        mysql_connection.commit()
+
+        print('passei pelo for de delete')
+
+        # Inserção de novas imagens no Banco
+        filenames = []
+        for file in new_files:
+            print(file)
+            filename = str(time.time()) + file.filename.replace(' ', '_')
+            filenames.append(filename)
+            file_path = os.path.join(upload_folder, filename)
+            with open(file_path, "wb") as f:
+                f.write(file.file.read())
+            cursor.execute(
+                "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
+                (str(uuid.uuid4()), id_product, filename)
+            )
+        ##########################
+        print('passei pelo for de insert')
+        mysql_connection.commit()
+        for index, item in enumerate(indexed_files):
+            cursor.execute(
+                'UPDATE image SET index_image = %s WHERE path = %s', (index, item))
+        mysql_connection.commit()
+        print('retornando')
+        return True
+    except Exception as e:
+        print(e)
+        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    # finally:
+        # cursor.close()
 
 
 @router.post("/product/description", tags=["Produtos"])
