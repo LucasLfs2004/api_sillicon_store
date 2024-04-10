@@ -28,17 +28,12 @@ async def get_categorys():
 
 
 @router.post("/category", tags=['Categoria'])
-async def create_category(name: str = Form(), path_img: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
+async def create_category(name_category: str = Form(), path_img: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 30)
 
-        cursor.execute('SELECT * FROM seller where id = %s',
-                       (current_user['seller_id'],))
-        data_seller = cursor.fetchone()
-
-        print(data_seller['admin'])
         if path_img is not None:
             filename_category = str(time.time()) + \
                 path_img.filename.replace(' ', '_')
@@ -47,14 +42,15 @@ async def create_category(name: str = Form(), path_img: UploadFile = File(None),
                 f.write(path_img.file.read())
             print(filename_category)
             cursor.execute("INSERT INTO CATEGORY (id, name, path_img) VALUES (%s, %s, %s)",
-                           (id, name, str("public/category/" + filename_category,)))
+                           (id, name_category, str("public/category/" + filename_category,)))
         else:
             cursor.execute("INSERT INTO CATEGORY (id, name) VALUES (%s, %s)",
-                           (id, name,))
+                           (id, name_category,))
         mysql_connection.commit()
 
         # Realizar consulta para obter os dados inseridos
-        cursor.execute("SELECT * FROM category WHERE NAME = %s", (name,))
+        cursor.execute("SELECT * FROM category WHERE NAME = %s",
+                       (name_category,))
         inserted_data = cursor.fetchone()
 
         # # Fechar o cursor e retornar o ID do produto

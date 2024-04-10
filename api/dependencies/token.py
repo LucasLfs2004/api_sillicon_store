@@ -70,17 +70,17 @@ def get_current_seller(token: str = Depends(oauth2_scheme)):
 
 
 def is_admin(token: str = Depends(oauth2_scheme)):
-    # credentials_exception = HTTPException(status_code=status.HTTP__UNAUTHORIZED,
-    #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
-
     token = verify_access_token(token)
 
     id_person = token['seller_id']
 
     cursor = mysql_connection.cursor(dictionary=True)
     cursor.execute('SELECT admin FROM seller WHERE id = %s', (id_person,))
-    data = cursor.fethcone()
-    print(data)
+    data = cursor.fetchone()
 
-    # user = db.query(models.User).filter(models.User.id == token.id).first()
-    return token
+    if data['admin'] == 1:
+        return {'admin': True,
+                'seller_id': id_person
+                }
+    else:
+        raise HTTPException(status_code=401, detail=str('Unautorized'))
