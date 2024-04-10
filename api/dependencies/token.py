@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
 from models.models import UserToken
+from database.connection import mysql_connection
 
 SECRET_KEY = secrets.token_hex(32)
 ALGORITHM = 'HS256'
@@ -63,6 +64,23 @@ def get_current_seller(token: str = Depends(oauth2_scheme)):
     #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
 
     token = verify_access_token(token)
+
+    # user = db.query(models.User).filter(models.User.id == token.id).first()
+    return token
+
+
+def is_admin(token: str = Depends(oauth2_scheme)):
+    # credentials_exception = HTTPException(status_code=status.HTTP__UNAUTHORIZED,
+    #                                       detail=f"Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})
+
+    token = verify_access_token(token)
+
+    id_person = token['seller_id']
+
+    cursor = mysql_connection.cursor(dictionary=True)
+    cursor.execute('SELECT admin FROM seller WHERE id = %s', (id_person,))
+    data = cursor.fethcone()
+    print(data)
 
     # user = db.query(models.User).filter(models.User.id == token.id).first()
     return token

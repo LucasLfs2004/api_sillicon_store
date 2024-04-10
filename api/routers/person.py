@@ -1,17 +1,12 @@
-from fastapi import APIRouter
 from database.connection import mysql_connection
-from fastapi import HTTPException, Form, status, Depends
+from fastapi import HTTPException, Depends, APIRouter
 from models.models import new_account, effect_login, UserToken, id_ship
 from dependencies.token import generate_jwt_token
 import bcrypt
-from typing import Optional
 import uuid
-import jwt
 import json
 from dependencies import token, formatters
 from requests.person import get_persons_query, get_person_id_query, get_user_profile
-from fastapi.security import OAuth2AuthorizationCodeBearer
-import secrets
 
 router = APIRouter()
 
