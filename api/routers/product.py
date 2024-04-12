@@ -153,20 +153,11 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
 
         if description is not None:
             cursor.execute('INSERT INTO description_product (id_description, id_product, description_html) VALUES (%s, %s, %s)',
-                           (int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32), description.id_product, description.description))
+                           (int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32), product['id'], description))
             mysql_connection.commit()
 
-        # print("Entrando no select gigante")
-        # print(product['id'])
-
-        # Realizar consulta para obter os dados inseridos
-        cursor.execute(get_product_id,
-                       (product['id'],))
-        product_data = cursor.fetchone()
-        # print('realizei o select')
-        # print(product_data)
         cursor.close()
-        return json.loads(product_data['product'])
+        return True
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
