@@ -24,4 +24,13 @@ async def get_image(image_path: str):
     if os.path.exists(file_path):
         return FileResponse(file_path)
     return {"error": "File not found"}
+
+
+@router.get("/image/banner/{image_path}", tags=["Imagens"])
+async def get_image(image_path: str):
+    print(image_path)
+    file_path = str("public/banner/" + image_path)
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "File not found"}
     # return image_path
