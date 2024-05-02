@@ -388,6 +388,32 @@ async def delete_description(id_product: str = Form()):
         cursor.close()
 
 
+# @router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
+# async def get_products_specif_brand(brand_id: str):
+#     try:
+#         cursor = mysql_connection.cursor(dictionary=True)
+#         cursor.execute(
+#             get_limit_products_specific_brand, (brand_id, 40)
+#         )
+#         data = cursor.fetchall()
+#         products = []
+
+#         for product in data:
+#             dict_product = json.loads(product["product"])
+#             dict_product["images"] = sorted(dict_product["images"])
+#             products.append(dict_product)
+
+#         cursor.execute(
+#             "select name as brand_name, brand_logo, brand_logo_black from brand where id = %s", (brand_id,))
+#         brand_obj = cursor.fetchone()
+#         print(brand_obj)
+#         brand_obj['products'] = products
+#         print(brand_obj)
+#         return brand_obj
+#     except Exception as e:
+#         return e
+
+
 @router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
 async def get_products_specif_brand(brand_id: str):
     try:
@@ -395,20 +421,20 @@ async def get_products_specif_brand(brand_id: str):
         cursor.execute(
             get_limit_products_specific_brand, (brand_id, 40)
         )
-        data = cursor.fetchall()
-        products = []
+        data = cursor.fetchone()
+        # print(data)
+        data = json.loads(data['products'])
 
         for product in data:
-            dict_product = json.loads(product["product"])
-            dict_product["images"] = sorted(dict_product["images"])
-            products.append(dict_product)
+            images = organize_images_from_products(product=product)
+            product['images'] = images
 
         cursor.execute(
             "select name as brand_name, brand_logo, brand_logo_black from brand where id = %s", (brand_id,))
-        brand_obj = cursor.fetchone()
-        print(brand_obj)
-        brand_obj['products'] = products
-        print(brand_obj)
-        return brand_obj
+        brand = cursor.fetchone()
+
+        brand['products'] = data
+        # print(brand_obj)
+        return brand
     except Exception as e:
         return e

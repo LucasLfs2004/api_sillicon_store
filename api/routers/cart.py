@@ -104,8 +104,9 @@ async def add_to_cart(new_cart: new_cart_item, current_user: int = Depends(token
                 "DELETE FROM cart_items WHERE id_product = %s", (cart['id_product'],))
             mysql_connection.commit()
         elif (len(data) == 1):
+            amount = cart['amount'] + data[0]['amount']
             cursor.execute(
-                "UPDATE cart_items SET amount = %s WHERE id = %s", (cart['amount'], data[0]['id']))
+                "UPDATE cart_items SET amount = %s WHERE id = %s", (amount, data[0]['id']))
             mysql_connection.commit()
         if (len(data) != 1):
             cursor.execute("INSERT INTO cart_items (id, id_person, id_product, amount) VALUES (%s, %s, %s, %s)",
@@ -158,15 +159,7 @@ async def patch_cart(cart_update: update_cart, current_user: int = Depends(token
             (cart_update.amount, cart_update.id, current_user))
         mysql_connection.commit()
 
-        cursor.execute(select_complete_cart,
-                       (current_user,))
-        product_data = cursor.fetchone()
-        print(product_data)
-
-        cart = await organize_response_cart(cart=product_data, id_person=current_user)
-        print(cart)
-
-        return cart
+        return True
     except Exception as e:
         return e
 
@@ -181,16 +174,8 @@ async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_c
             (id, current_user))
         mysql_connection.commit()
 
-        cursor.execute(select_complete_cart,
-                       (current_user,))
-        product_data = cursor.fetchone()
-        print(product_data)
-
-        cart = await organize_response_cart(cart=product_data, id_person=current_user)
-        print(cart)
-
         cursor.close()
-        return cart
+        return True
 
     except Exception as e:
         return e
