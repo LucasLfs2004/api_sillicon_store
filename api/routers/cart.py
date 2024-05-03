@@ -136,7 +136,7 @@ async def clear_cart(current_user: int = Depends(token.get_current_user)):
         mysql_connection.commit()
         print(current_user)
         cursor.execute(
-            'UPDATE cart_user SET discount = 0, discount_value = 0, product_total_value = 1, voucher = NULL, portions = 0, ship_value = 0, cart_total_value = 0, ship_cep = NULL, ship_street = null, ship_deadline = NULL WHERE id_person = %s',
+            'UPDATE cart_user SET discount = 0, discount_value = 0, product_total_value = 0, voucher = NULL, portions = 0, ship_value = 0, cart_total_value = 0, ship_cep = NULL, ship_street = null, ship_deadline = NULL WHERE id_person = %s',
             (current_user,)
         )
         mysql_connection.commit()

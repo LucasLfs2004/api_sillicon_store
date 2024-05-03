@@ -17,12 +17,9 @@ async def get_brands():
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM BRAND")
         inserted_data = cursor.fetchall()
-
-        # # Fechar o cursor e retornar o ID do produto
         cursor.close()
         return inserted_data
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
