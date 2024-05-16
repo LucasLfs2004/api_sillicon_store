@@ -79,15 +79,13 @@ async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), 
         # Realizar consulta para obter os dados inseridos
         cursor.execute("SELECT * FROM brand WHERE ID = %s", (id,))
         inserted_data = cursor.fetchone()
+        cursor.close()
 
-        # # Fechar o cursor e retornar o ID do produto
-        return {"new_category:": inserted_data}
+        return inserted_data
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
 
 
 @router.patch("/brand", tags=["Marca"])

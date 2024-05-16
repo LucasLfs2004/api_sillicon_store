@@ -22,7 +22,23 @@ async def get_banners():
         cursor.close()
         return inserted_data
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+
+@router.get("/banner/all", tags=["Admin", "Banner"])
+async def get_banners():
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM banner")
+        inserted_data = cursor.fetchall()
+
+        # # Fechar o cursor e retornar o ID do produto
+        cursor.close()
+        return inserted_data
+    except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -30,7 +46,6 @@ async def get_banners():
 
 
 @router.post("/banner", tags=['Admin', 'Banner'])
-# , current_user: int = Depends(token.is_admin)):
 async def create_banner(link_redirect: str = Form(), image_web: UploadFile = File(), image_mobile: UploadFile = File(), current_user: int = Depends(token.is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
@@ -166,7 +181,7 @@ async def handle_active_banner(id: str):
 
     except Exception as e:
         print(e)
-        return e
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @ router.delete("/banner/{id}", tags=["Admin", "Banner"])
