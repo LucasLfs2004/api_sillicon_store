@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import date
+from datetime import datetime
 
 
 class new_voucher(BaseModel):
     code: str
     discount: float
-    expiration: date
+    expiration: int
     min_value: float

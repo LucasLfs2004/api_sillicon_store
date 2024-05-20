@@ -21,7 +21,9 @@ async def get_cart_user(id_person: str):
 
         return data
     except Exception as e:
-        return e
+
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/cart", tags=['User', 'Carrinho'])
@@ -38,7 +40,8 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         return cart
 
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/cart", tags=['Carrinho'])
@@ -146,7 +149,8 @@ async def clear_cart(current_user: int = Depends(token.get_current_user)):
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.patch("/cart-item", tags=["Carrinho"])
@@ -161,7 +165,8 @@ async def patch_cart(cart_update: update_cart, current_user: int = Depends(token
 
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/cart-item/{id}", tags=["Carrinho"])
@@ -178,7 +183,8 @@ async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_c
         return True
 
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/cart-discount", tags=['Carrinho'])
@@ -214,7 +220,8 @@ async def apply_discount_in_cart(code: apply_discount, current_user: int = Depen
         return cart
 
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/cart-discount", tags=['Carrinho'])
@@ -237,7 +244,8 @@ async def clear_voucher_discount(current_user: int = Depends(token.get_current_u
 
         return cart
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post('/cart-ship', tags=['Carrinho'])
@@ -265,4 +273,5 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
         cart = await organize_response_cart(cart=cart_data, id_person=current_user)
         return cart
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

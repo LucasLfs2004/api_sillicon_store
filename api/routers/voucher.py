@@ -10,7 +10,7 @@ router = APIRouter()
 
 # current_user: int = Depends(is_admin)
 
-@router.get("/voucher", tags=["Admin"])
+@router.get("/voucher", tags=['Cupom de desconto', "Admin"])
 def get_vouchers_of_discounts():
     try:
         cursor = mysql_connection.cursor(dictionary=True)
@@ -25,19 +25,21 @@ def get_vouchers_of_discounts():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/voucher", tags=['Comentários de produto'])
-def post_comment(voucher: new_voucher):
+@router.post("/voucher", tags=['Cupom de desconto', 'Admin'])
+def post_discount(voucher: new_voucher):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
-            "INSERT INTO discount_list (code, id_product, title_text, comment_text, rating_value ) VALUES (%s, %s, %s, %s, %s)",
-            (id, comment.id_product, comment.title, comment.comment, comment.rating)
+            "INSERT INTO discount_list (code, discount, expire_at, min_value ) VALUES (%s, %s, FROM_UNIXTIME(%s), %s)",
+            (voucher.code, voucher.discount,
+             voucher.expiration, voucher.min_value)
         )
 
         mysql_connection.commit()
 
         # Realizar consulta para obter os dados inseridos
-        cursor.execute("SELECT * FROM comment WHERE id_comment = %s", (id,))
+        cursor.execute("SELECT * FROM discount_list WHERE code = %s",
+                       (voucher.code,))
         inserted_data = cursor.fetchone()
 
         # # Fechar o cursor e retornar o ID do produto
@@ -49,18 +51,18 @@ def post_comment(voucher: new_voucher):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/comment", tags=["Comentários de produto"])
-def delete_comment(id_comment: str = Form()):
+@router.delete("/voucher/{code}", tags=["Cupom de desconto", 'Admin'])
+def delete_discount(code: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
-            "DELETE FROM COMMENT WHERE id_comment = %s", (id_comment,))
+            "DELETE FROM discount_list WHERE code = %s", (code,))
         mysql_connection.commit()
 
         return True
-
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
     finally:
         cursor.close()

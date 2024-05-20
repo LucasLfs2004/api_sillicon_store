@@ -56,11 +56,10 @@ def delete_comment(id_comment: str = Form()):
         cursor.execute(
             "DELETE FROM COMMENT WHERE id_comment = %s", (id_comment,))
         mysql_connection.commit()
+        cursor.close()
 
         return True
 
     except Exception as e:
-        return e
-
-    finally:
-        cursor.close()
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

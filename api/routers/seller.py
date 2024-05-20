@@ -36,8 +36,8 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         return data
 
     except Exception as e:
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.patch("/seller/product/offer", tags=['Vendedor'])
@@ -50,8 +50,8 @@ async def change_value_product(infos: offer_product, current_user: int = Depends
         return True
 
     except Exception as e:
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/seller/product/description", tags=['Vendedor'])
@@ -60,8 +60,7 @@ async def set_description_product(description: description_product, current_user
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
         cursor = mysql_connection.cursor(dictionary=True)
-        print(description)
-        print(id)
+
         cursor.execute(
             'INSERT INTO description_product (id_description, id_product, description_html) VALUES (%s, %s, %s)', (id, description.id_product, description.description))
         mysql_connection.commit()
@@ -69,8 +68,6 @@ async def set_description_product(description: description_product, current_user
         return True
 
     except Exception as e:
-        print('ERROR: ' + e)
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -82,8 +79,6 @@ async def patch_description_product(description: description_product, current_us
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
         cursor = mysql_connection.cursor(dictionary=True)
-        # print(description)
-        print(id)
         cursor.execute(
             'UPDATE description_product set description_html = %s WHERE id_product = %s', (description.description, description.id_product))
         mysql_connection.commit()
@@ -91,7 +86,5 @@ async def patch_description_product(description: description_product, current_us
         return True
 
     except Exception as e:
-        print('ERROR: ' + e)
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))

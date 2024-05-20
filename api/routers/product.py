@@ -33,7 +33,8 @@ async def get_products():
 
         return products
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/product/{limit}", tags=['Produtos'])
@@ -52,7 +53,8 @@ async def get_limited_products(limit: int):
 
         return data
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
@@ -62,25 +64,15 @@ async def search_product(product_id: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
-        print(cursor)
-
-        print(product_id)
-        # print(get_product_id)
-        # return get_product_id
-
         cursor.execute(get_product_id, (product_id, ))
-        print('passei pelo cursor')
         data = cursor.fetchone()
-        # return data
         product = json.loads(data["product"])
-        print(data)
         images = organize_images_from_products(product=product)
         product['images'] = images
-        print(product)
         return product
     except Exception as e:
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/product/name/{product_name}", tags=['Produtos'])
@@ -93,7 +85,6 @@ async def search_product(product_name: str):
         cursor.execute(search_product_name,
                        (search, search))
         data = cursor.fetchone()
-        # print(data)
         data = json.loads(data['products'])
 
         for product in data:
@@ -102,14 +93,14 @@ async def search_product(product_name: str):
 
         return data
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/product", tags=['Produtos'])
 async def create_product(name: str = Form(), brand_id: str = Form(), category_id: str = Form(),
                          price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...), user=Depends(token.get_current_seller)):
     filenames = []
-    # time_stamp = calendar.timegm(current_GMT)
     product = {
         'id': int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32),
         'active': True,
@@ -122,7 +113,6 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
         'model': model
     }
     try:
-        # Conectar ao banco de dados
         cursor = mysql_connection.cursor(dictionary=True)
 
         cursor.execute("INSERT INTO product (id, seller_id, name, brand_id, category_id, stock, warranty, active, featured, model) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
@@ -143,7 +133,6 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
                 "INSERT INTO image (id, id_product, path, index_image) VALUES (%s, %s, %s, %s)",
                 (str(uuid.uuid4()), product['id'], filename, index)
             )
-        # print(filenames)
 
         cursor.execute(
             "INSERT INTO rating (id, id_product, amount, rating) VALUES (%s, %s, %s, %s)",
@@ -159,7 +148,6 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
         cursor.close()
         return True
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -218,8 +206,6 @@ async def delete_product(id_product: str = Form()):
 
         return True
     except Exception as e:
-        print('ERROR: ' + e)
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -237,7 +223,8 @@ async def update_product(product: update_product_model, user=Depends(token.get_c
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/product/image", tags=["Produtos"])
@@ -248,7 +235,8 @@ async def delete_image(id_image: str = Form()):
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
@@ -273,7 +261,8 @@ async def upload_images(id_product: str = Form(), files: List[UploadFile] = File
             mysql_connection.commit()
         return filenames
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
@@ -286,11 +275,8 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
                    'FILES_TO_DELETE': files_to_delete,
                    'FILES_TO_KEEP': indexed_files
                    }
-        print(entrada)
 
         cursor = mysql_connection.cursor(dictionary=True)
-
-        print('entrando no for')
 
         # Exclusão das imagens
         for filename in files_to_delete:
@@ -316,7 +302,6 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
         # Inserção de novas imagens no Banco
         filenames = []
         for file in new_files:
-            print(file)
             filename = str(time.time()) + file.filename.replace(' ', '_')
             filenames.append(filename)
             file_path = os.path.join(upload_folder, filename)
@@ -327,21 +312,16 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
                 (str(uuid.uuid4()), id_product, filename)
             )
         ##########################
-        print('passei pelo for de insert')
+
         mysql_connection.commit()
         for index, item in enumerate(indexed_files):
             cursor.execute(
                 'UPDATE image SET index_image = %s WHERE path = %s', (index, item))
         mysql_connection.commit()
-        print('retornando')
         return True
     except Exception as e:
-        print(e)
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    # finally:
-        # cursor.close()
 
 
 @router.post("/product/description", tags=["Produtos"])
@@ -354,7 +334,8 @@ async def create_description(description: new_description):
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
@@ -369,7 +350,8 @@ async def create_description(description: new_description):
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
@@ -383,35 +365,10 @@ async def delete_description(id_product: str = Form()):
         mysql_connection.commit()
         return True
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
-
-
-# @router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
-# async def get_products_specif_brand(brand_id: str):
-#     try:
-#         cursor = mysql_connection.cursor(dictionary=True)
-#         cursor.execute(
-#             get_limit_products_specific_brand, (brand_id, 40)
-#         )
-#         data = cursor.fetchall()
-#         products = []
-
-#         for product in data:
-#             dict_product = json.loads(product["product"])
-#             dict_product["images"] = sorted(dict_product["images"])
-#             products.append(dict_product)
-
-#         cursor.execute(
-#             "select name as brand_name, brand_logo, brand_logo_black from brand where id = %s", (brand_id,))
-#         brand_obj = cursor.fetchone()
-#         print(brand_obj)
-#         brand_obj['products'] = products
-#         print(brand_obj)
-#         return brand_obj
-#     except Exception as e:
-#         return e
 
 
 @router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
@@ -422,7 +379,7 @@ async def get_products_specif_brand(brand_id: str):
             get_limit_products_specific_brand, (brand_id, 40)
         )
         data = cursor.fetchone()
-        # print(data)
+
         data = json.loads(data['products'])
 
         for product in data:
@@ -434,7 +391,8 @@ async def get_products_specif_brand(brand_id: str):
         brand = cursor.fetchone()
 
         brand['products'] = data
-        # print(brand_obj)
+
         return brand
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

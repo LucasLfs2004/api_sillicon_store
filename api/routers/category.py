@@ -106,7 +106,6 @@ async def update_category(id: str = Form(), name: str = Form(None), path_img: Up
         return True
 
     except Exception as e:
-        print(e)
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -134,6 +133,5 @@ async def delete_category(id: str, current_user: int = Depends(token.is_admin)):
         return True
 
     except Exception as e:
-        cursor.close()
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))

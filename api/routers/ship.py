@@ -18,7 +18,8 @@ async def set_ship_cart(region: str):
 
         return data
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get('/ship-info', tags=["User", "Informações de entrega"])
