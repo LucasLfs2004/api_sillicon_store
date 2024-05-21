@@ -34,6 +34,7 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         cursor.execute(select_complete_cart,
                        (current_user,))
         cart = cursor.fetchone()
+        print(cart)
 
         cart = await organize_response_cart(cart=cart, id_person=current_user)
 

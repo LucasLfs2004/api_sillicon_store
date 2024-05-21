@@ -48,8 +48,12 @@ async def set_ship_info(ship: ship_info_post, current_user: int = Depends(token.
             cursor.execute(
                 'UPDATE person SET principal_ship_id = %s WHERE id = %s', (id, current_user))
             mysql_connection.commit()
+
+        cursor.execute('SELECT * FROM ship_info where id = %s', (id, ))
+        data = cursor.fetchone()
+
         cursor.close()
-        return True
+        return data
 
     except Exception as e:
         mysql_connection.rollback()
