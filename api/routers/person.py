@@ -37,31 +37,12 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         cursor.close()
 
 
-@router.post("/principal-ship", tags=['User'])
-async def get_data_user(principal_ship: id_ship, current_user: int = Depends(token.get_current_user)):
-    try:
-        print(current_user)
-        print(principal_ship.id)
-        cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute(
-            'UPDATE person SET principal_ship_id = %s WHERE id = %s', (principal_ship.id, current_user))
-        mysql_connection.commit()
-        return True
-        cursor.execute(get_user_profile, (current_user,))
-        profile_data = cursor.fetchone()
-        return json.loads(profile_data['person'])
-    except Exception as e:
-        return e
-    finally:
-        cursor.close()
-
-
 @router.post("/login", tags=['User'])
 def login_user(login: effect_login):
     try:
-        print(login)
+
         cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute(get_person_id_query, (login.email,))
+        cursor.execute(get_person_id_query, (login.email.strip().lower(),))
         person = cursor.fetchone()
         # cursor.close
 
@@ -142,6 +123,21 @@ def create_account(account: new_account):
 
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
+
+@router.post("/principal-ship", tags=['User'])
+async def get_data_user(principal_ship: id_ship, current_user: int = Depends(token.get_current_user)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            'UPDATE person SET principal_ship_id = %s WHERE id = %s', (principal_ship.id, current_user))
+        mysql_connection.commit()
+        return True
+    except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:

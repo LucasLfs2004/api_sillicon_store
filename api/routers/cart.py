@@ -208,16 +208,7 @@ async def apply_discount_in_cart(code: apply_discount, current_user: int = Depen
                            (current_user,))
             mysql_connection.commit()
 
-            # Realizar consulta para obter os dados inseridos
-        cursor.execute(select_complete_cart,
-                       (current_user,))
-        product_data = cursor.fetchone()
-        print(product_data)
-
-        cart = await organize_response_cart(cart=product_data, id_person=current_user)
-        print(cart)
-
-        return cart
+        return True
 
     except Exception as e:
         mysql_connection.rollback()
@@ -236,13 +227,7 @@ async def clear_voucher_discount(current_user: int = Depends(token.get_current_u
         mysql_connection.commit()
 
         # Realizar consulta para obter os dados inseridos
-        cursor.execute(select_complete_cart,
-                       (current_user,))
-        product_data = cursor.fetchone()
-
-        cart = await organize_response_cart(cart=product_data, id_person=current_user)
-
-        return cart
+        return True
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -265,13 +250,7 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
         cursor.execute('CALL atualizar_cart_user(%s)',
                        (current_user,))
         mysql_connection.commit()
-
-        cursor.execute(select_complete_cart,
-                       (current_user,))
-        cart_data = cursor.fetchone()
-
-        cart = await organize_response_cart(cart=cart_data, id_person=current_user)
-        return cart
+        return True
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))

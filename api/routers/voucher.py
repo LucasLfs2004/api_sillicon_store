@@ -11,7 +11,7 @@ router = APIRouter()
 # current_user: int = Depends(is_admin)
 
 @router.get("/voucher", tags=['Cupom de desconto', "Admin"])
-def get_vouchers_of_discounts():
+def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
@@ -26,7 +26,7 @@ def get_vouchers_of_discounts():
 
 
 @router.post("/voucher", tags=['Cupom de desconto', 'Admin'])
-def post_discount(voucher: new_voucher):
+def post_discount(voucher: new_voucher, current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
@@ -37,14 +37,8 @@ def post_discount(voucher: new_voucher):
 
         mysql_connection.commit()
 
-        # Realizar consulta para obter os dados inseridos
-        cursor.execute("SELECT * FROM discount_list WHERE code = %s",
-                       (voucher.code,))
-        inserted_data = cursor.fetchone()
-
-        # # Fechar o cursor e retornar o ID do produto
         cursor.close()
-        return inserted_data
+        return True
     except Exception as e:
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
@@ -52,7 +46,7 @@ def post_discount(voucher: new_voucher):
 
 
 @router.delete("/voucher/{code}", tags=["Cupom de desconto", 'Admin'])
-def delete_discount(code: str):
+def delete_discount(code: str, current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(

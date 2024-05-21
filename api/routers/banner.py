@@ -24,8 +24,6 @@ async def get_banners():
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cursor.close()
 
 
 @router.get("/banner/all", tags=["Admin", "Banner"])
