@@ -1,6 +1,6 @@
 from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
-from dependencies import token
-from database.connection import mysql_connection
+from api.dependencies import token
+from api.database.connection import mysql_connection
 import uuid
 import time
 import os

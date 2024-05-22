@@ -1,15 +1,15 @@
 import os
 import uuid
 from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
-from dependencies.const import current_GMT
+from api.dependencies.const import current_GMT
 from typing import List
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import time
 import json
-from dependencies import token
-from models.product import update_product_model, new_description
-from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
-from functions.product import organize_images_from_products
+from api.dependencies import token
+from api.models.product import update_product_model, new_description
+from api.requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
+from api.functions.product import organize_images_from_products
 
 router = APIRouter()
 

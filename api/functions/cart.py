@@ -1,4 +1,4 @@
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import json
 
 

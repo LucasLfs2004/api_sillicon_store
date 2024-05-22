@@ -1,11 +1,11 @@
 import uuid
 from fastapi import HTTPException, APIRouter, Form, Depends
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import json
-from models.models import new_cart, update_cart, apply_discount, ship_cart, id_model, new_cart_item
-from dependencies import token
-from requests.cart import select_complete_cart
-from functions.cart import organize_response_cart
+from api.models.models import new_cart, update_cart, apply_discount, ship_cart, id_model, new_cart_item
+from api.dependencies import token
+from api.requests.cart import select_complete_cart
+from api.functions.cart import organize_response_cart
 
 router = APIRouter()
 

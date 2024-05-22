@@ -1,10 +1,10 @@
 import uuid
 from fastapi import HTTPException, APIRouter, Form, Depends
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import json
-from models.ship import ship_info_patch, ship_info_post
-from dependencies import token
-from requests.ship import get_ship_info_request
+from api.models.ship import ship_info_patch, ship_info_post
+from api.dependencies import token
+from api.requests.ship import get_ship_info_request
 router = APIRouter()
 
 

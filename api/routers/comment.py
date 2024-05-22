@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import uuid
 import time
 import os
 from fastapi import HTTPException, APIRouter, UploadFile, File, Form
-from models.models import new_comment
+from api.models.models import new_comment
 
 router = APIRouter()
 

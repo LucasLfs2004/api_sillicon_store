@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Form
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 import uuid
-from models.voucher import new_voucher
-from dependencies.token import is_admin
+from api.models.voucher import new_voucher
+from api.dependencies.token import is_admin
 
 
 router = APIRouter()

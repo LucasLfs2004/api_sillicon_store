@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 from fastapi import HTTPException, Form, status, Depends
 import json
-from dependencies import token
-from requests.seller import get_seller_data
-from functions.product import organize_images_from_products
-from models.seller import offer_product, description_product
+from api.dependencies import token
+from api.requests.seller import get_seller_data
+from api.functions.product import organize_images_from_products
+from api.models.seller import offer_product, description_product
 import uuid
 
 router = APIRouter()

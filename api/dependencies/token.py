@@ -5,8 +5,8 @@ from fastapi import Depends, HTTPException, status
 # from routers.person import oauth2_scheme
 from typing import Optional
 from fastapi.security import OAuth2PasswordBearer
-from models.models import UserToken
-from database.connection import mysql_connection
+from api.models.models import UserToken
+from api.database.connection import mysql_connection
 
 SECRET_KEY = secrets.token_hex(32)
 ALGORITHM = 'HS256'

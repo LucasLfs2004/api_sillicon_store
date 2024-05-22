@@ -1,12 +1,12 @@
-from database.connection import mysql_connection
+from api.database.connection import mysql_connection
 from fastapi import HTTPException, Depends, APIRouter
-from models.models import new_account, effect_login, UserToken, id_ship
-from dependencies.token import generate_jwt_token
+from api.models.models import effect_login, new_account, id_ship 
+from api.dependencies.token import generate_jwt_token
 import bcrypt
 import uuid
 import json
-from dependencies import token, formatters
-from requests.person import get_persons_query, get_person_id_query, get_user_profile
+from api.dependencies import token, formatters
+from api.requests.person import get_persons_query, get_person_id_query, get_user_profile
 
 router = APIRouter()
 
