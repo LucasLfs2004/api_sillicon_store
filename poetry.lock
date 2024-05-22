@@ -383,6 +383,16 @@ files = [
 ]
 
 [[package]]
+name = "mysql-connector"
+version = "2.2.9"
+description = "MySQL driver written in Python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "mysql-connector-2.2.9.tar.gz", hash = "sha256:1733e6ce52a049243de3264f1fbc22a852cb35458c4ad739ba88189285efdf32"},
+]
+
+[[package]]
 name = "orjson"
 version = "3.10.3"
 description = "Fast, correct Python JSON library supporting dataclasses, datetimes, and numpy"
@@ -1061,4 +1071,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "71c337400de35b0f6d3989d7228a45a1d698a828ab3fd3a30b9fbdb576c4366f"
+content-hash = "91071865570cee61ddac63fcd71bdd5bc7d60015289b76db34013503fa7b204b"
