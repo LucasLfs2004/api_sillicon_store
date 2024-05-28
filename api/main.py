@@ -1,3 +1,4 @@
+import uvicorn
 import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from routers import person, product, category, brand, comment, image, cart, seller, ship, banner, voucher
+import signal
 
 app = FastAPI()
 
@@ -47,9 +49,11 @@ def read_root():
     return {"Hello": "World"}
 
 
+def shutdown():
+    # Realize qualquer limpeza necessária antes de encerrar
+    print("Encerrando a aplicação...")
+
+
 if __name__ == "__main__":
-    import uvicorn
+    signal.signal(signal.SIGINT, lambda s, f: shutdown())
     uvicorn.run(app, host="0.0.0.0", port=8080)
-
-
-

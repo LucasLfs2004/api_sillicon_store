@@ -36,7 +36,7 @@ async def calc_list_portions(array_cart: dict, id_person: str):
 
             cursor.execute('''SELECT JSON_ARRAYAGG(
                                     JSON_OBJECT(
-                                        'often', portion.often, 'value_credit', portion.value_credit, 'value_portion', portion.value_portion
+                                        'id', portion.id, 'often', portion.often, 'value_credit', portion.value_credit, 'value_portion', portion.value_portion
                                     )
                                 ) AS portions
                             from portion

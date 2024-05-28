@@ -22,9 +22,9 @@ def get_persons():
 
 @router.get("/person/me", tags=['User'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
+    cursor = mysql_connection.cursor(dictionary=True)
     try:
         print(current_user)
-        cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_user_profile, (current_user,))
         profile_data = cursor.fetchone()
         print(profile_data)
@@ -32,13 +32,14 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         return json.loads(profile_data['person'])
 
     except Exception as e:
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
 
 
 @router.post("/login", tags=['User'])
-def login_user(login: effect_login):
+async def login_user(login: effect_login):
     try:
 
         cursor = mysql_connection.cursor(dictionary=True)

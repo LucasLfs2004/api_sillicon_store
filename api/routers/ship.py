@@ -11,10 +11,12 @@ router = APIRouter()
 @router.get('/ship-value/{region}', tags=['Prazo de entrega'])
 async def set_ship_cart(region: str):
     try:
+        print(region)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             "SELECT * FROM ship_value WHERE region = %s", (region,))
         data = cursor.fetchone()
+        cursor.close()
 
         return data
     except Exception as e:
@@ -28,6 +30,7 @@ async def get_ship_info(current_user: int = Depends(token.get_current_user)):
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_ship_info_request, (current_user,))
         data = cursor.fetchone()
+        cursor.close()
         return json.loads(data['ship'])
     except Exception as e:
         mysql_connection.rollback()

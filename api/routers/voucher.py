@@ -11,7 +11,7 @@ router = APIRouter()
 # current_user: int = Depends(is_admin)
 
 @router.get("/voucher", tags=['Cupom de desconto', "Admin"])
-def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
+async def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
@@ -26,7 +26,7 @@ def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
 
 
 @router.post("/voucher", tags=['Cupom de desconto', 'Admin'])
-def post_discount(voucher: new_voucher, current_user: int = Depends(is_admin)):
+async def post_discount(voucher: new_voucher, current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
@@ -46,7 +46,7 @@ def post_discount(voucher: new_voucher, current_user: int = Depends(is_admin)):
 
 
 @router.delete("/voucher/{code}", tags=["Cupom de desconto", 'Admin'])
-def delete_discount(code: str, current_user: int = Depends(is_admin)):
+async def delete_discount(code: str, current_user: int = Depends(is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
