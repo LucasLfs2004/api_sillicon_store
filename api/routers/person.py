@@ -7,6 +7,7 @@ import uuid
 import json
 from dependencies import token, formatters
 from requests.person import get_persons_query, get_person_id_query, get_user_profile
+from functions.product import organize_images_from_products
 
 router = APIRouter()
 
@@ -24,12 +25,17 @@ def get_persons():
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     cursor = mysql_connection.cursor(dictionary=True)
     try:
-        print(current_user)
         cursor.execute(get_user_profile, (current_user,))
         profile_data = cursor.fetchone()
-        print(profile_data)
+
+        data = json.loads(profile_data['person'])
+
+        for product in data['last_order']['items']:
+            images = organize_images_from_products(product=product)
+            product['images'] = images
+
         # profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
-        return json.loads(profile_data['person'])
+        return data
 
     except Exception as e:
         mysql_connection.rollback()
