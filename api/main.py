@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from routers import person, product, category, brand, comment, image, cart, seller, ship, banner, voucher
+from routers import person, product, category, brand, comment, image, cart, seller, ship, banner, voucher, order
 import signal
 
 app = FastAPI()
@@ -32,6 +32,7 @@ app.include_router(seller.router)
 app.include_router(ship.router)
 app.include_router(banner.router)
 app.include_router(voucher.router)
+app.include_router(order.router)
 
 
 @app.exception_handler(StarletteHTTPException)
