@@ -1,11 +1,17 @@
-import uvicorn
-import time
-from fastapi import FastAPI
+from routers import person, product, category, brand, comment, image, cart, seller, ship, banner, voucher, order
+from fastapi import HTTPException, Depends, FastAPI
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from routers import person, product, category, brand, comment, image, cart, seller, ship, banner, voucher, order
+from database.connection import mysql_connection
+from dependencies.token import generate_jwt_token
+from requests.person import get_person_id_query
+from typing import Annotated
+import uvicorn
+import time
+import bcrypt
 import signal
 
 app = FastAPI()
@@ -50,8 +56,31 @@ def read_root():
     return {"Hello": "World"}
 
 
+@app.post("/token")
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(get_person_id_query, (form_data.username.strip().lower(),))
+        person = cursor.fetchone()
+
+        if person is None:
+            raise HTTPException(
+                status_code=401, detail="Usuário não encontrado")
+
+        if bcrypt.checkpw(form_data.password.encode("utf-8"), person["password"].encode("utf-8")):
+            person.pop("password", None)
+            token = generate_jwt_token(
+                {'user_id': person["id"], 'seller_id': person['id_seller']})
+            return {"access_token": token,
+                    "token_type": "bearer",
+                    "person": person}
+        else:
+            raise HTTPException(status_code=401, detail="Senha incorreta")
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 def shutdown():
-    # Realize qualquer limpeza necessária antes de encerrar
     print("Encerrando a aplicação...")
 
 

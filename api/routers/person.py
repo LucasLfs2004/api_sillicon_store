@@ -1,11 +1,11 @@
 from database.connection import mysql_connection
 from fastapi import HTTPException, Depends, APIRouter
-from models.models import new_account, effect_login, UserToken, id_ship
+from models.models import new_account, effect_login, id_ship
 from dependencies.token import generate_jwt_token
 import bcrypt
 import uuid
 import json
-from dependencies import token, formatters
+from dependencies import token
 from requests.person import get_persons_query, get_person_id_query, get_user_profile
 from functions.product import organize_images_from_products
 
@@ -29,12 +29,12 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         profile_data = cursor.fetchone()
 
         data = json.loads(profile_data['person'])
-
-        for product in data['last_order']['items']:
-            images = organize_images_from_products(product=product)
-            product['images'] = images
-
-        # profile_data['cpf'] = formatters.format_cpf(profile_data['cpf'])
+        
+        if data['last_order'] is not None and data['last_order']['items'] is not None:
+            for product in data['last_order']['items']:
+                if product is not None:
+                    images = organize_images_from_products(product=product)
+                    product['images'] = images
         return data
 
     except Exception as e:

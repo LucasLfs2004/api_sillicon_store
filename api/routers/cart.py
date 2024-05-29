@@ -1,30 +1,12 @@
 import uuid
-from fastapi import HTTPException, APIRouter, Form, Depends
+from fastapi import HTTPException, APIRouter, Depends
 from database.connection import mysql_connection
-import json
-from models.models import new_cart, update_cart, apply_discount, ship_cart, id_model, new_cart_item
+from models.models import new_cart, update_cart, apply_discount, ship_cart, new_cart_item
 from dependencies import token
 from requests.cart import select_complete_cart
 from functions.cart import organize_response_cart
 
 router = APIRouter()
-
-
-@router.get("/cart/{id_person}", tags=['Carrinho'])
-async def get_cart_user(id_person: str):
-    try:
-        cursor = mysql_connection.cursor(dictionary=True)
-
-        cursor.execute(
-            select_complete_cart, (id_person,))
-        data = cursor.fetchall()
-
-        return data
-    except Exception as e:
-
-        mysql_connection.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.get("/cart", tags=['User', 'Carrinho'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
