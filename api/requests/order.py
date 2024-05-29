@@ -90,3 +90,31 @@ SELECT JSON_OBJECT(
 FROM purchase_order as purchase
 WHERE
     purchase.id_order = %s"""
+
+
+select_data_order = """
+SELECT JSON_OBJECT(
+        'discount', cart.discount, 'discount_value', cart.discount_value, 'product_total_value', cart.product_total_value, 'cart_total_value', cart.cart_total_value, 'voucher', cart.voucher, 'portions', cart.portions, 'ship_value', cart.ship_value, 'ship_deadline', cart.ship_deadline, 
+        'items', JSON_ARRAYAGG(
+            JSON_OBJECT(
+                'id', items.id, 'product_id', items.id_product, 'amount', items.amount, 'name', p.name, 'value', JSON_OBJECT(
+                    'price_now', vp.price_now, 'common_price', vp.common_price, 'portions', vp.portions, 'fees_monthly', vp.fees_monthly, 'fees_credit', vp.fees_credit
+                )
+            )
+        ), 'ship', (
+            SELECT JSON_OBJECT(
+                    'district', district, 'city', cidade, 'state', estado, 'receiver_name', receiver, 'street', street, 'cep', cep, 'complement', complement, 'ship_number', number, 'phone_number', phone_number
+                )
+            FROM ship_info
+            WHERE
+                id = cart.ship_id
+        )
+    ) AS cart
+FROM
+    cart_user cart
+    LEFT JOIN cart_items items on cart.id_person = items.id_person
+    LEFT JOIN value_product vp on items.id_product = vp.id_product
+    LEFT JOIN product p on items.id_product = p.id
+WHERE
+    cart.id_person = %s
+"""

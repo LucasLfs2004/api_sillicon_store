@@ -1,10 +1,11 @@
 import uuid
 from fastapi import HTTPException, APIRouter, Depends
 from database.connection import mysql_connection
-from models.models import new_cart, update_cart, apply_discount, ship_cart, new_cart_item
+from models.models import new_cart, update_cart, apply_discount, new_cart_item
 from dependencies import token
 from requests.cart import select_complete_cart
 from functions.cart import organize_response_cart
+from models.cart import ship_cart, ship_cart_id
 
 router = APIRouter()
 
@@ -238,3 +239,30 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post('/cart-ship/', tags=['Carrinho'])
+async def set_ship_cart_id(ship: ship_cart_id, current_user: int = Depends(token.get_current_user)):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            "SELECT * FROM ship_value WHERE region = %s", (ship.region,))
+        ship_value = cursor.fetchone()
+        cursor.execute(
+            "SELECT cep, street FROM ship_info WHERE id = %s", (ship.id,))
+        ship_info = cursor.fetchone()
+
+        # Update da table cart_user
+        cursor.execute("UPDATE cart_user SET ship_value = %s, ship_deadline = %s, ship_id = %s, ship_cep = %s, ship_street = %s WHERE id_person = %s",
+                       (ship_value['value'], ship_value['deadline'], ship.id, ship_info['cep'], ship_info['street'], current_user))
+        mysql_connection.commit()
+
+        # Chamada da procedure
+        cursor.execute('CALL atualizar_cart_user(%s)',
+                       (current_user,))
+        mysql_connection.commit()
+        return True
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    
+

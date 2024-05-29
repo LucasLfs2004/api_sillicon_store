@@ -70,12 +70,6 @@ class apply_discount(BaseModel):
     code: str
 
 
-class ship_cart(BaseModel):
-    region: str
-    cep: str
-    street: str
-
-
 class id_model(BaseModel):
     id: str
 
