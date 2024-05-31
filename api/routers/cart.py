@@ -9,6 +9,7 @@ from models.cart import ship_cart, ship_cart_id
 
 router = APIRouter()
 
+
 @router.get("/cart", tags=['User', 'Carrinho'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
@@ -240,7 +241,8 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post('/cart-ship/', tags=['Carrinho'])
+
+@router.patch('/cart-ship/', tags=['Carrinho'])
 async def set_ship_cart_id(ship: ship_cart_id, current_user: int = Depends(token.get_current_user)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
@@ -264,5 +266,3 @@ async def set_ship_cart_id(ship: ship_cart_id, current_user: int = Depends(token
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    
-
