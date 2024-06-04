@@ -11,19 +11,9 @@ import uuid
 router = APIRouter()
 
 
-# @router.get("/seller", tags=['User'])
-# def get_persons():
-#     cursor = mysql_connection.cursor(dictionary=True)
-#     cursor.execute(get_persons_query)
-#     person = cursor.fetchall()
-#     cursor.close()
-#     return person
-
-
 @router.get("/seller/me", tags=['Vendedor'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
-        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_seller_data, (current_user,))
         profile_data = cursor.fetchone()
@@ -75,9 +65,6 @@ async def set_description_product(description: description_product, current_user
 @router.patch("/seller/product/description", tags=['Vendedor'])
 async def patch_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):
     try:
-        print(current_user)
-        id = int.from_bytes(
-            uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             'UPDATE description_product set description_html = %s WHERE id_product = %s', (description.description, description.id_product))

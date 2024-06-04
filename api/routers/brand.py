@@ -39,7 +39,6 @@ async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), 
             file_path = os.path.join(upload_folder, filename_brand_logo)
             with open(file_path, "wb") as f:
                 f.write(brand_logo.file.read())
-            print(filename_brand_logo)
 
         if brand_logo_black is not None:
             filename_brand_logo_black = str(
@@ -47,7 +46,6 @@ async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), 
             file_path = os.path.join(upload_folder, filename_brand_logo_black)
             with open(file_path, "wb") as f:
                 f.write(brand_logo_black.file.read())
-            print(filename_brand_logo_black)
 
         if brand_logo is not None and brand_logo_black is not None:
             cursor.execute(
@@ -109,7 +107,6 @@ async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: Upl
             file_path = os.path.join(upload_folder, filename_brand_logo)
             with open(file_path, "wb") as f:
                 f.write(brand_logo.file.read())
-            print(filename_brand_logo)
             new_brand["brand_logo"] = str(filename_brand_logo)
         else:
             new_brand["brand_logo"] = old_brand["brand_logo"]
@@ -120,7 +117,6 @@ async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: Upl
             file_path = os.path.join(upload_folder, filename_brand_logo_black)
             with open(file_path, "wb") as f:
                 f.write(brand_logo_black.file.read())
-            print(filename_brand_logo_black)
             new_brand["brand_logo_black"] = str(filename_brand_logo_black)
         else:
             new_brand["brand_logo_black"] = old_brand["brand_logo_black"]
@@ -131,8 +127,6 @@ async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: Upl
              new_brand["brand_logo_black"], id)
         )
         mysql_connection.commit()
-
-        print("Tudo certo até aqui, iniciando a exclusão das imagens antigas")
 
         # Removendo imagens antigas da api
         if brand_logo is not None:
@@ -150,8 +144,8 @@ async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: Upl
         return True
 
     except Exception as e:
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/brand", tags=["Marca"])
@@ -167,21 +161,17 @@ async def update_brand(id: str = Form(), name: str = Form(), brand_logo: UploadF
         file_path = os.path.join(upload_folder, filename_brand_logo)
         with open(file_path, "wb") as f:
             f.write(brand_logo.file.read())
-        print(filename_brand_logo)
         filename_brand_logo_black = str(
             time.time()) + brand_logo_black.filename.replace(' ', '_')
         file_path = os.path.join(upload_folder, filename_brand_logo_black)
         with open(file_path, "wb") as f:
             f.write(brand_logo_black.file.read())
-        print(filename_brand_logo_black)
 
         cursor.execute(
             "UPDATE BRAND SET name = %s, brand_logo = %s, brand_logo_black = %s WHERE id = %s",
             (name, filename_brand_logo, filename_brand_logo_black, id)
         )
         mysql_connection.commit()
-
-        print("Tudo certo até aqui, iniciando a exclusão das imagens antigas")
 
         # Removendo imagens antigas da api
         filename_logo = os.path.join(
@@ -198,8 +188,8 @@ async def update_brand(id: str = Form(), name: str = Form(), brand_logo: UploadF
         return brand_updated
 
     except Exception as e:
-        print(e)
-        return e
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.delete("/brand/{id}", tags=["Marca"])

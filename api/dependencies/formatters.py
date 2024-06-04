@@ -7,6 +7,5 @@ def format_cpf(cpf):
 
     # Formatar o CPF
     formatted_cpf = f"{cpf_digits[:3]}.XXX.XXX-{cpf_digits[9:]}"
-    print(f'cpf: {formatted_cpf}')
 
     return formatted_cpf

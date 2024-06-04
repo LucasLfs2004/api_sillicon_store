@@ -11,7 +11,6 @@ router = APIRouter()
 @router.get('/ship-value/{region}', tags=['Prazo de entrega'])
 async def set_ship_cart(region: str):
     try:
-        print(region)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             "SELECT * FROM ship_value WHERE region = %s", (region,))

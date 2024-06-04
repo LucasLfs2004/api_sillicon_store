@@ -20,18 +20,14 @@ async def get_limited_products(current_user: int = Depends(token.get_current_use
 
         cursor.execute(select_purchase_order, (current_user,))
         data = cursor.fetchone()
-        print(data)
         if data['purchases'] is None:
             return None
         data = json.loads(data['purchases'])
-        # print(data)
 
         for item in data:
             for product in item['items']:
-                print(product)
                 images = organize_images_from_products(product=product)
                 product['images'] = images
-                print(product)
         dados_ordenados = sorted(
             data, key=lambda x: x['order_date'], reverse=True)
         return dados_ordenados
@@ -92,14 +88,10 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
             data_portion = cursor.fetchone()
             order_total_value = float(data_portion['value_credit'])
             portion_value = float(data_portion['value_portion'])
-        print('Entrando no Insert purchase order')
-        print(purchase.often)
 
         cursor.execute(insert_purchase_order,
                        (id_order, current_user, 'completed', order_total_value, purchase.payment_method, portion_value, purchase.often, order['ship']['street'], order['ship']['city'], order['ship']['cep'], order['ship']['state'], order['ship']['ship_number'], order['ship']['complement'], order['discount_value'], order['ship_value']))
         mysql_connection.commit()
-
-        print('Sai do insert')
 
         for item in order['items']:
             value_product = 0
@@ -112,7 +104,6 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
                 value = value_product
                 value_product = calc_portion_value(fees_credit=item['value']['fees_credit'],
                                                    fees_monthly=item['value']['fees_monthly'], price=value, often=purchase.often)
-            print(value_product)
             cursor.execute('INSERT INTO order_item (id_order_item, id_order, id_product, quantity, price) VALUES (%s, %s, %s, %s, %s)',
                            (generate_id(), id_order, item['product_id'], item['amount'], value_product))
             mysql_connection.commit()

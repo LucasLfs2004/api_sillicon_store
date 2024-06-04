@@ -55,13 +55,11 @@ async def create_banner(link_redirect: str = Form(), image_web: UploadFile = Fil
         file_path = os.path.join(upload_folder, filename_image_web)
         with open(file_path, "wb") as f:
             f.write(image_web.file.read())
-        print(filename_image_web)
         filename_image_mobile = str(time.time()) + \
             image_mobile.filename.replace(' ', '_')
         file_path = os.path.join(upload_folder, filename_image_mobile)
         with open(file_path, "wb") as f:
             f.write(image_mobile.file.read())
-        print(filename_image_mobile)
 
         cursor.execute(
             "INSERT INTO banner (id, img_banner_web, img_banner_mobile, link) VALUES (%s, %s, %s, %s)",
@@ -70,14 +68,10 @@ async def create_banner(link_redirect: str = Form(), image_web: UploadFile = Fil
 
         mysql_connection.commit()
 
-        # Realizar consulta para obter os dados inseridos
         cursor.execute("SELECT * FROM banner WHERE ID = %s", (id,))
         inserted_data = cursor.fetchone()
-        cursor.close()
-        # # Fechar o cursor e retornar o ID do produto
         return inserted_data
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -93,16 +87,10 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
         old_banner = cursor.fetchone()
 
         new_banner = {}
-
-        print(old_banner['link'])
-        print(link_redirect)
         if link_redirect is not None:
             new_banner["link"] = link_redirect
         else:
             new_banner["link"] = old_banner['link']
-
-        print('passei pelo primeiro if')
-
         if active is not None:
             new_banner["active"] = True
         else:
@@ -114,7 +102,6 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
             file_path = os.path.join(upload_folder, filename_image_web)
             with open(file_path, "wb") as f:
                 f.write(image_web.file.read())
-            print(filename_image_web)
             new_banner["img_banner_web"] = str(filename_image_web)
         else:
             new_banner["img_banner_web"] = old_banner["img_banner_web"]
@@ -125,7 +112,6 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
             file_path = os.path.join(upload_folder, filename_image_mobile)
             with open(file_path, "wb") as f:
                 f.write(image_mobile.file.read())
-            print(filename_image_mobile)
             new_banner["img_banner_mobile"] = str(filename_image_mobile)
         else:
             new_banner["img_banner_mobile"] = old_banner["img_banner_mobile"]
@@ -136,8 +122,6 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
              new_banner["img_banner_mobile"], new_banner["active"], id)
         )
         mysql_connection.commit()
-
-        print("Tudo certo até aqui, iniciando a exclusão das imagens antigas")
 
         # Removendo imagens antigas da api
         if image_web is not None:
@@ -153,9 +137,7 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
         return True
 
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
-        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -178,8 +160,10 @@ async def handle_active_banner(id: str):
         return True
 
     except Exception as e:
-        print(e)
+        mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
 
 
 @ router.delete("/banner/{id}", tags=["Admin", "Banner"])

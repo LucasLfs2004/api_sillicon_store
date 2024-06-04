@@ -1,7 +1,5 @@
 def organize_images_from_products(product):
     images = []
-    # print(product)
-    # print(product['images'])
 
     swapped = False
     length_arr = len(product['images'])
@@ -19,6 +17,5 @@ def organize_images_from_products(product):
         if not swapped:
             return
     for image in product['images']:
-        # print(image)
         images.append(image['path'])
     return images

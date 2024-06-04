@@ -29,7 +29,7 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         profile_data = cursor.fetchone()
 
         data = json.loads(profile_data['person'])
-        
+
         if data['last_order'] is not None and data['last_order']['items'] is not None:
             for product in data['last_order']['items']:
                 if product is not None:
@@ -80,7 +80,6 @@ def create_account(account: new_account):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    print(persons)
     cpfValid = True
     emailValid = True
     for person in persons:
@@ -129,7 +128,6 @@ def create_account(account: new_account):
                 "person": person}
 
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:

@@ -46,6 +46,7 @@ async def calc_list_portions(array_cart: dict, id_person: str):
         return json.loads(portions['portions'])
     except Exception as e:
         print(e)
+        return None
 
 
 async def organize_response_cart(cart: dict, id_person: str):
@@ -72,3 +73,4 @@ def calc_portion_value(fees_monthly: float, fees_credit: float, price: float, of
         return round(value_total, 2)
     except Exception as e:
         print(e)
+        return None

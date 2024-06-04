@@ -44,7 +44,6 @@ async def get_limited_products(limit: int):
 
         cursor.execute(get_limit_products, (limit,))
         data = cursor.fetchone()
-        # print(data)
         data = json.loads(data['products'])
 
         for product in data:
@@ -164,17 +163,12 @@ async def delete_product(id_product: str, current_user: int = Depends(token.get_
                 id_product,)
         )
         data = cursor.fetchall()
-        print(data)
-        print(id_product)
         cursor.execute(
             "DELETE FROM product WHERE product.id = %s", (id_product,))
         mysql_connection.commit()
 
-        print('entrando no for')
         for filename in data:
             filename_img = os.path.join(upload_folder + "/" + filename["path"])
-            print(filename)
-            print(filename_img)
             os.remove(filename_img)
 
         cursor.close()
@@ -194,14 +188,11 @@ async def delete_product(id_product: str = Form()):
                 id_product,)
         )
         data = cursor.fetchall()
-        print(data)
         cursor.execute("DELETE FROM product where id LIKE %s", (id_product,))
         mysql_connection.commit()
 
         for filename in data:
             filename_img = os.path.join(filename["path"])
-            print(filename)
-            print(filename_img)
             os.remove(filename_img)
 
         return True
@@ -280,7 +271,6 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
 
         # Exclusão das imagens
         for filename in files_to_delete:
-            print(filename)
             cursor.execute("SELECT * FROM IMAGE WHERE path = %s", (filename,))
             filename_db = cursor.fetchone()
 
@@ -288,16 +278,12 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
                 cursor.execute(
                     "DELETE FROM image WHERE image.path = %s", (filename,))
                 mysql_connection.commit()
-                print('passei do cursor de delete')
 
                 filename_img = os.path.join(upload_folder + "/" + filename)
-                print(filename)
-                print(filename_img)
                 os.remove(filename_img)
+
         ##########################
         mysql_connection.commit()
-
-        print('passei pelo for de delete')
 
         # Inserção de novas imagens no Banco
         filenames = []

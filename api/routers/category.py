@@ -39,7 +39,6 @@ async def create_category(name: str = Form(), path_img: UploadFile = File(None),
             file_path = os.path.join(upload_folder, filename_category)
             with open(file_path, "wb") as f:
                 f.write(path_img.file.read())
-            print(filename_category)
             cursor.execute("INSERT INTO CATEGORY (id, name, path_img) VALUES (%s, %s, %s)",
                            (id, name, str("public/category/" + filename_category,)))
         else:
@@ -47,17 +46,14 @@ async def create_category(name: str = Form(), path_img: UploadFile = File(None),
                            (id, name,))
         mysql_connection.commit()
 
-        # Realizar consulta para obter os dados inseridos
         cursor.execute("SELECT * FROM category WHERE NAME = %s",
                        (name,))
         inserted_data = cursor.fetchone()
 
-        # # Fechar o cursor e retornar o ID do produto
         cursor.close()
         return inserted_data
 
     except Exception as e:
-        # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -83,13 +79,11 @@ async def update_category(id: str = Form(), name: str = Form(None), path_img: Up
             file_path = os.path.join(upload_folder, filename_path_img)
             with open(file_path, "wb") as f:
                 f.write(path_img.file.read())
-            print(filename_path_img)
             new_category["path_img"] = filename_path_img
 
             if old_category['path_img'] is not None:
                 filename_img = os.path.join(
                     upload_folder + "/" + old_category['path_img'])
-                print(filename_img)
                 os.remove(filename_img)
 
         else:
@@ -101,10 +95,8 @@ async def update_category(id: str = Form(), name: str = Form(None), path_img: Up
         )
         mysql_connection.commit()
 
-        print("Tudo certo até aqui, iniciando a exclusão das imagens antigas")
         cursor.close()
         return True
-
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
@@ -114,22 +106,18 @@ async def update_category(id: str = Form(), name: str = Form(None), path_img: Up
 async def delete_category(id: str, current_user: int = Depends(token.is_admin)):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
-        print("Executando select")
         cursor.execute("SELECT * FROM CATEGORY WHERE id = %s",
                        (id,))
         category_delete = cursor.fetchone()
-        print("executando DELETE")
         cursor.execute("DELETE FROM CATEGORY WHERE id LIKE %s", (id,)),
         mysql_connection.commit()
 
-        print(category_delete)
         if category_delete["path_img"] is not None:
             filename_logo = os.path.join(
                 upload_folder + "/" + category_delete["brand_logo"])
             os.remove(filename_logo)
 
         cursor.close()
-        print(True)
         return True
 
     except Exception as e:

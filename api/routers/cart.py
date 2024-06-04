@@ -13,13 +13,11 @@ router = APIRouter()
 @router.get("/cart", tags=['User', 'Carrinho'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
-        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(select_complete_cart,
                        (current_user,))
         cart = cursor.fetchone()
         cursor.close()
-        print(cart)
 
         cart = await organize_response_cart(cart=cart, id_person=current_user)
 
@@ -80,8 +78,6 @@ async def add_to_cart(new_cart: new_cart_item, current_user: int = Depends(token
         'amount': new_cart.amount,
     }
     try:
-        print(current_user)
-        # Conectar ao banco de dados
         cursor = mysql_connection.cursor(dictionary=True)
 
         cursor.execute("SELECT * FROM cart_items WHERE id_person = %s and id_product = %s",
@@ -123,7 +119,6 @@ async def clear_cart(current_user: int = Depends(token.get_current_user)):
             "DELETE FROM cart_items WHERE id_person = %s", (current_user,)
         )
         mysql_connection.commit()
-        print(current_user)
         cursor.execute(
             'UPDATE cart_user SET discount = 0, discount_value = 0, product_total_value = 0, voucher = NULL, portions = 0, ship_value = 0, cart_total_value = 0, ship_cep = NULL, ship_street = null, ship_deadline = NULL WHERE id_person = %s',
             (current_user,)
@@ -158,7 +153,6 @@ async def patch_cart(cart_update: update_cart, current_user: int = Depends(token
 @router.delete("/cart-item/{id}", tags=["Carrinho"])
 async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_current_user)):
     try:
-        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             "DELETE FROM cart_items WHERE id = %s and id_person = %s",
@@ -176,20 +170,16 @@ async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_c
 @router.post("/cart-discount", tags=['Carrinho'])
 async def apply_discount_in_cart(code: apply_discount, current_user: int = Depends(token.get_current_user)):
     try:
-        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             'SELECT * FROM discount_list WHERE code = %s', (code.code,))
         code_data = cursor.fetchone()
-        print(code_data)
-        # return code_data
         if (code_data is None):
             return "Cupom Inválido"
         else:
             cursor.execute('UPDATE cart_user SET voucher = %s WHERE id_person = %s',
                            (code.code, current_user))
             mysql_connection.commit()
-            print('chamando a procedure')
             cursor.execute('CALL atualizar_cart_user(%s)',
                            (current_user,))
             mysql_connection.commit()
@@ -204,7 +194,6 @@ async def apply_discount_in_cart(code: apply_discount, current_user: int = Depen
 @router.delete("/cart-discount", tags=['Carrinho'])
 async def clear_voucher_discount(current_user: int = Depends(token.get_current_user)):
     try:
-        print(current_user)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             'UPDATE cart_user SET voucher = NULL WHERE id_person = %s', (current_user,))
