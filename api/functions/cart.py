@@ -63,14 +63,12 @@ async def organize_response_cart(cart: dict, id_person: str):
     return array_cart
 
 
-async def calc_portion_value(fees_monthly: float, fees_credity: float, price: float, often: int):
+def calc_portion_value(fees_monthly: float, fees_credit: float, price: float, often: int):
     try:
-        value = price * (1 + fees_credity / 100)
-        if i > 0:
-            for i in range(often):
-                value *= (1 + fees_monthly / 100) ** (i + 1)
-
-            value = round(value, 2)
-        return value
+        value_total = price * (1 + (fees_credit / 100))
+        if often > 0:
+            return round((value_total *
+                          ((1 + fees_monthly / 100) ** (often))), 2)
+        return round(value_total, 2)
     except Exception as e:
         print(e)

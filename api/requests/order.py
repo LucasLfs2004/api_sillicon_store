@@ -43,7 +43,9 @@ select_purchase_order = """SELECT JSON_ARRAYAGG(
     ) as purchases
 FROM purchase_order as purchase
 WHERE
-    purchase.id_customer = %s"""
+    purchase.id_customer = %s
+ORDER BY purchase.order_date DESC
+"""
 
 select_purchase_order_id = """
 SELECT JSON_OBJECT(
@@ -117,4 +119,42 @@ FROM
     LEFT JOIN product p on items.id_product = p.id
 WHERE
     cart.id_person = %s
+"""
+
+insert_purchase_order = """
+INSERT INTO
+    purchase_order (
+        id_order,
+        id_customer,
+        status_order,
+        total_value,
+        payment_method,
+        portions_value,
+        often,
+        delivery_street,
+        delivery_city,
+        delivery_cep,
+        delivery_state,
+        delivery_number,
+        delivery_complement,
+        discount_value,
+        ship_value
+    )
+VALUES (
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s
+    )
 """
