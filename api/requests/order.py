@@ -1,11 +1,11 @@
 select_purchase_order = """SELECT JSON_ARRAYAGG(
         JSON_OBJECT(
             'id_order', purchase.id_order, 'order_date', purchase.order_date, 'status_order', purchase.status_order, 'total_value', purchase.total_value, 'payment_method', purchase.payment_method, 'portions_value', purchase.portions_value, 'often', purchase.often, 'delivery_infos', JSON_OBJECT(
-                'street', purchase.delivery_street, 'cep', purchase.delivery_cep, 'state', purchase.delivery_state, 'number', purchase.delivery_number, 'complement', purchase.delivery_complement, 'city', purchase.delivery_city
+                'street', purchase.delivery_street, 'cep', purchase.delivery_cep, 'state', purchase.delivery_state, 'number', purchase.delivery_number, 'complement', purchase.delivery_complement, 'city', purchase.delivery_city, 'receiver_name', purchase.delivery_receiver
             ), 'items', (
                 Select JSON_ARRAYAGG(
                         JSON_OBJECT(
-                            'id_order_item', order_item.id_order_item, 'id_product', order_item.id_product, 'quantity', order_item.quantity, 'warranty', product.warranty, 'price', order_item.price, 'name', product.name, 'category', category.name, 'brand', JSON_OBJECT(
+                            'id_order_item', order_item.id_order_item, 'store_name', seller.store_name, 'id_product', order_item.id_product, 'quantity', order_item.quantity, 'warranty', product.warranty, 'price', order_item.price, 'name', product.name, 'category', category.name, 'brand', JSON_OBJECT(
                                 'name', brand.name, 'logo', brand.brand_logo, 'logo_black', brand.brand_logo_black
                             ), 'images', (
                                 Select JSON_ARRAYAGG(
@@ -36,6 +36,8 @@ select_purchase_order = """SELECT JSON_ARRAYAGG(
                     LEFT JOIN brand on product.brand_id = brand.id
                     LEFT JOIN category on product.category_id = category.id
                     LEFT JOIN rating on product.id = rating.id_product
+                    LEFT JOIN seller on product.seller_id = seller.id
+
                 WHERE
                     order_item.id_order = purchase.id_order
             )
@@ -49,12 +51,12 @@ ORDER BY purchase.order_date DESC
 
 select_purchase_order_id = """
 SELECT JSON_OBJECT(
-        'id_order', purchase.id_order, 'order_date', purchase.order_date, 'status_order', purchase.status_order, 'total_value', purchase.total_value, 'payment_method', purchase.payment_method, 'portions_value', purchase.portions_value, 'often', purchase.often, 'delivery_infos', JSON_OBJECT(
-            'street', purchase.delivery_street, 'cep', purchase.delivery_cep, 'state', purchase.delivery_state, 'number', purchase.delivery_number, 'complement', purchase.delivery_complement, 'city', purchase.delivery_city
+        'id_order', purchase.id_order, 'order_date', purchase.order_date, 'status_order', purchase.status_order, 'total_value', purchase.total_value, 'ship_value', purchase.ship_value, 'discount_value', purchase.discount_value, 'payment_method', purchase.payment_method, 'portions_value', purchase.portions_value, 'often', purchase.often, 'delivery_infos', JSON_OBJECT(
+            'street', purchase.delivery_street, 'cep', purchase.delivery_cep, 'state', purchase.delivery_state, 'number', purchase.delivery_number, 'complement', purchase.delivery_complement, 'city', purchase.delivery_city, 'receiver_name', purchase.delivery_receiver 
         ), 'items', (
             Select JSON_ARRAYAGG(
                     JSON_OBJECT(
-                        'id_order_item', order_item.id_order_item, 'id_product', order_item.id_product, 'quantity', order_item.quantity, 'warranty', product.warranty, 'price', order_item.price, 'name', product.name, 'category', category.name, 'brand', JSON_OBJECT(
+                        'id_order_item', order_item.id_order_item, 'store_name', seller.store_name, 'id_product', order_item.id_product, 'quantity', order_item.quantity, 'warranty', product.warranty, 'price', order_item.price, 'name', product.name, 'category', category.name, 'brand', JSON_OBJECT(
                             'name', brand.name, 'logo', brand.brand_logo, 'logo_black', brand.brand_logo_black
                         ), 'images', (
                             Select JSON_ARRAYAGG(
@@ -85,6 +87,7 @@ SELECT JSON_OBJECT(
                 LEFT JOIN brand on product.brand_id = brand.id
                 LEFT JOIN category on product.category_id = category.id
                 LEFT JOIN rating on product.id = rating.id_product
+                LEFT JOIN seller on product.seller_id = seller.id
             WHERE
                 order_item.id_order = purchase.id_order
         )
@@ -92,7 +95,6 @@ SELECT JSON_OBJECT(
 FROM purchase_order as purchase
 WHERE
     purchase.id_order = %s"""
-
 
 select_data_order = """
 SELECT JSON_OBJECT(
@@ -138,9 +140,11 @@ INSERT INTO
         delivery_number,
         delivery_complement,
         discount_value,
-        ship_value
+        ship_value,
+        delivery_receiver
     )
 VALUES (
+        %s,
         %s,
         %s,
         %s,

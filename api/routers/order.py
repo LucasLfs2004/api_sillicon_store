@@ -90,7 +90,7 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
             portion_value = float(data_portion['value_portion'])
 
         cursor.execute(insert_purchase_order,
-                       (id_order, current_user, 'completed', order_total_value, purchase.payment_method, portion_value, purchase.often, order['ship']['street'], order['ship']['city'], order['ship']['cep'], order['ship']['state'], order['ship']['ship_number'], order['ship']['complement'], order['discount_value'], order['ship_value']))
+                       (id_order, current_user, 'completed', order_total_value, purchase.payment_method, portion_value, purchase.often, order['ship']['street'], order['ship']['city'], order['ship']['cep'], order['ship']['state'], order['ship']['ship_number'], order['ship']['complement'], order['discount_value'], order['ship_value'], order['receiver']['receiver_name']))
         mysql_connection.commit()
 
         for item in order['items']:
