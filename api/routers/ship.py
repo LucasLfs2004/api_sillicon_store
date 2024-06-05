@@ -1,5 +1,5 @@
 import uuid
-from fastapi import HTTPException, APIRouter, Form, Depends
+from fastapi import HTTPException, APIRouter, Depends
 from database.connection import mysql_connection
 import json
 from models.ship import ship_info_patch, ship_info_post

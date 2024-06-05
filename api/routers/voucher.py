@@ -1,14 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, Form
+from fastapi import APIRouter, HTTPException, Depends
 from database.connection import mysql_connection
-import uuid
 from models.voucher import new_voucher
 from dependencies.token import is_admin
 
-
 router = APIRouter()
-
-
-# current_user: int = Depends(is_admin)
 
 @router.get("/voucher", tags=['Cupom de desconto', "Admin"])
 async def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
@@ -23,7 +18,6 @@ async def get_vouchers_of_discounts(current_user: int = Depends(is_admin)):
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/voucher", tags=['Cupom de desconto', 'Admin'])
 async def post_discount(voucher: new_voucher, current_user: int = Depends(is_admin)):
@@ -43,7 +37,6 @@ async def post_discount(voucher: new_voucher, current_user: int = Depends(is_adm
         # Em caso de erro, cancelar a transação e retornar uma resposta de erro
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.delete("/voucher/{code}", tags=["Cupom de desconto", 'Admin'])
 async def delete_discount(code: str, current_user: int = Depends(is_admin)):
