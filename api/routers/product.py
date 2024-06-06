@@ -1,14 +1,13 @@
 import os
 import uuid
-from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
-from dependencies.const import current_GMT
-from typing import List
-from database.connection import mysql_connection
 import time
 import json
+from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
+from typing import List
+from database.connection import mysql_connection
 from dependencies import token
 from models.product import update_product_model, new_description
-from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand
+from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand, get_limit_products_specific_category
 from functions.product import organize_images_from_products
 
 router = APIRouter()
@@ -379,6 +378,32 @@ async def get_products_specif_brand(brand_id: str):
         brand['products'] = data
 
         return brand
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/product/category/{category_id}", tags=['Produtos', 'Categoria'])
+async def get_products_specif_brand(category_id: str):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(
+            get_limit_products_specific_category, (category_id, 40)
+        )
+        data = cursor.fetchone()
+
+        data = json.loads(data['products'])
+
+        for product in data:
+            images = organize_images_from_products(product=product)
+            product['images'] = images
+
+        cursor.execute(
+            "select name from category where id = %s", (category_id,))
+        category = cursor.fetchone()
+
+        category['products'] = data
+
+        return category
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))

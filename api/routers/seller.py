@@ -1,6 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Depends
 from database.connection import mysql_connection
-from fastapi import HTTPException, Form, status, Depends
 import json
 from dependencies import token
 from requests.seller import get_seller_data
@@ -9,7 +8,6 @@ from models.seller import offer_product, description_product
 import uuid
 
 router = APIRouter()
-
 
 @router.get("/seller/me", tags=['Vendedor'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
@@ -29,7 +27,6 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @router.patch("/seller/product/offer", tags=['Vendedor'])
 async def change_value_product(infos: offer_product, current_user: int = Depends(token.get_current_seller)):
     try:
@@ -42,7 +39,6 @@ async def change_value_product(infos: offer_product, current_user: int = Depends
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.post("/seller/product/description", tags=['Vendedor'])
 async def set_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):
@@ -60,7 +56,6 @@ async def set_description_product(description: description_product, current_user
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.patch("/seller/product/description", tags=['Vendedor'])
 async def patch_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):

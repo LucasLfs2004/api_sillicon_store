@@ -1,5 +1,4 @@
 from fastapi import HTTPException, APIRouter, UploadFile, File, Form, Depends
-from models.models import new_category
 from dependencies import token
 from database.connection import mysql_connection
 import uuid

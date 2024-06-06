@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from database.connection import mysql_connection
 import uuid
-import time
-import os
-from fastapi import HTTPException, APIRouter, UploadFile, File, Form
+from fastapi import HTTPException, APIRouter, Form
 from models.models import new_comment
 
 router = APIRouter()
@@ -33,8 +31,8 @@ def post_comment(comment: new_comment):
         id = str(uuid.uuid4())
 
         cursor.execute(
-            "INSERT INTO comment (id_comment, id_product, title_text, comment_text, rating_value ) VALUES (%s, %s, %s, %s, %s)",
-            (id, comment.id_product, comment.title, comment.comment, comment.rating)
+            "INSERT INTO comment (id_comment, id_product, title_text, comment_text, rating_value, id_order_item ) VALUES (%s, %s, %s, %s, %s, %s)",
+            (id, comment.id_product, comment.title, comment.comment, comment.rating, comment.id_order_item)
         )
 
         mysql_connection.commit()

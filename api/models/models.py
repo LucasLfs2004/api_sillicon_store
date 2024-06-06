@@ -48,6 +48,7 @@ class new_comment(BaseModel):
     title: str
     comment: Optional[str] = None
     rating: float
+    id_order_item: str
 
 
 class new_cart(BaseModel):
