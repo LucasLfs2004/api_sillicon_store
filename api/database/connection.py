@@ -1,5 +1,3 @@
-import mysql.connector
-
 import pymysql.cursors
 
 mysql_host = "127.0.0.1"
