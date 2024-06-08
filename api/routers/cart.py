@@ -13,7 +13,7 @@ router = APIRouter()
 @router.get("/cart", tags=['User', 'Carrinho'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(select_complete_cart,
                        (current_user,))
         cart = cursor.fetchone()
@@ -38,7 +38,7 @@ async def add_to_cart(new_cart: new_cart):
     }
     try:
         # Conectar ao banco de dados
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM cart_items WHERE id_person = %s and id_product = %s",
                        (cart['id_person'], cart['id_product']))
@@ -78,7 +78,7 @@ async def add_to_cart(new_cart: new_cart_item, current_user: int = Depends(token
         'amount': new_cart.amount,
     }
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM cart_items WHERE id_person = %s and id_product = %s",
                        (current_user, cart['id_product']))
@@ -114,7 +114,7 @@ async def add_to_cart(new_cart: new_cart_item, current_user: int = Depends(token
 @router.delete('/cart', tags=['Carrinho'])
 async def clear_cart(current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "DELETE FROM cart_items WHERE id_person = %s", (current_user,)
         )
@@ -137,7 +137,7 @@ async def clear_cart(current_user: int = Depends(token.get_current_user)):
 @router.patch("/cart-item", tags=["Carrinho"])
 async def patch_cart(cart_update: update_cart, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(
             "UPDATE cart_items SET amount = %s WHERE id like %s and id_person like %s",
@@ -153,7 +153,7 @@ async def patch_cart(cart_update: update_cart, current_user: int = Depends(token
 @router.delete("/cart-item/{id}", tags=["Carrinho"])
 async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "DELETE FROM cart_items WHERE id = %s and id_person = %s",
             (id, current_user))
@@ -170,7 +170,7 @@ async def delete_item_from_cart(id: str, current_user: int = Depends(token.get_c
 @router.post("/cart-discount", tags=['Carrinho'])
 async def apply_discount_in_cart(code: apply_discount, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             'SELECT * FROM discount_list WHERE code = %s', (code.code,))
         code_data = cursor.fetchone()
@@ -194,7 +194,7 @@ async def apply_discount_in_cart(code: apply_discount, current_user: int = Depen
 @router.delete("/cart-discount", tags=['Carrinho'])
 async def clear_voucher_discount(current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             'UPDATE cart_user SET voucher = NULL WHERE id_person = %s', (current_user,))
         cursor.execute('CALL atualizar_cart_user(%s)',
@@ -211,7 +211,7 @@ async def clear_voucher_discount(current_user: int = Depends(token.get_current_u
 @router.post('/cart-ship', tags=['Carrinho'])
 async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "SELECT * FROM ship_value WHERE region = %s", (ship.region,))
         data = cursor.fetchone()
@@ -234,7 +234,7 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
 @router.patch('/cart-ship/', tags=['Carrinho'])
 async def set_ship_cart_id(ship: ship_cart_id, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "SELECT * FROM ship_value WHERE region = %s", (ship.region,))
         ship_value = cursor.fetchone()

@@ -14,7 +14,7 @@ os.makedirs(upload_folder, exist_ok=True)
 @router.get("/category", tags=["Categoria"])
 async def get_categorys():
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("SELECT * FROM category")
         categorys = cursor.fetchall()
 
@@ -28,7 +28,7 @@ async def get_categorys():
 @router.post("/category", tags=['Categoria'])
 async def create_category(name: str = Form(), path_img: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 30)
 
@@ -60,7 +60,7 @@ async def create_category(name: str = Form(), path_img: UploadFile = File(None),
 @router.patch("/category", tags=["Categoria"])
 async def update_category(id: str = Form(), name: str = Form(None), path_img: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM CATEGORY WHERE id = %s", (id,))
         old_category = cursor.fetchone()
@@ -104,7 +104,7 @@ async def update_category(id: str = Form(), name: str = Form(None), path_img: Up
 @router.delete("/category/{id}", tags=["Categoria"])
 async def delete_category(id: str, current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("SELECT * FROM CATEGORY WHERE id = %s",
                        (id,))
         category_delete = cursor.fetchone()

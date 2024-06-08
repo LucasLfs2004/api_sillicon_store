@@ -74,7 +74,7 @@ def is_admin(token: str = Depends(oauth2_scheme)):
 
     id_person = token['seller_id']
 
-    cursor = mysql_connection.cursor(dictionary=True)
+    cursor = mysql_connection.cursor()
     cursor.execute('SELECT admin FROM seller WHERE id = %s', (id_person,))
     data = cursor.fetchone()
 

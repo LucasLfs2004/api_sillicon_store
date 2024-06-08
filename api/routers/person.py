@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.get("/person", tags=['User'])
 def get_persons():
-    cursor = mysql_connection.cursor(dictionary=True)
+    cursor = mysql_connection.cursor()
     cursor.execute(get_persons_query)
     person = cursor.fetchall()
     cursor.close()
@@ -23,7 +23,7 @@ def get_persons():
 
 @router.get("/person/me", tags=['User'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
-    cursor = mysql_connection.cursor(dictionary=True)
+    cursor = mysql_connection.cursor()
     try:
         cursor.execute(get_user_profile, (current_user,))
         profile_data = cursor.fetchone()
@@ -48,7 +48,7 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
 async def login_user(login: effect_login):
     try:
 
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(get_person_id_query, (login.email.strip().lower(),))
         person = cursor.fetchone()
         # cursor.close
@@ -73,7 +73,7 @@ async def login_user(login: effect_login):
 @router.post("/create-account", tags=['User'])
 def create_account(account: new_account):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "SELECT * FROM PERSON WHERE CPF LIKE %s OR EMAIL LIKE %s", (account.cpf, account.email))
         persons = cursor.fetchall()
@@ -103,7 +103,7 @@ def create_account(account: new_account):
 
     try:
         # Conectar ao banco de dados
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         # Codificação de senha
         salt = bcrypt.gensalt()
@@ -137,7 +137,7 @@ def create_account(account: new_account):
 @router.post("/principal-ship", tags=['User'])
 async def get_data_user(principal_ship: id_ship, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             'UPDATE person SET principal_ship_id = %s WHERE id = %s', (principal_ship.id, current_user))
         mysql_connection.commit()

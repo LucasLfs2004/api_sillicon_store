@@ -19,7 +19,7 @@ os.makedirs(upload_folder, exist_ok=True)
 @router.get("/product", tags=['Produtos'])
 async def get_products():
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(get_all_products)
         data = cursor.fetchall()
@@ -39,7 +39,7 @@ async def get_products():
 @router.get("/product/{limit}", tags=['Produtos'])
 async def get_limited_products(limit: int):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(get_limit_products, (limit,))
         data = cursor.fetchone()
@@ -60,7 +60,7 @@ async def get_limited_products(limit: int):
 @router.get("/product/id/{product_id}", tags=['Produtos'])
 async def search_product(product_id: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(get_product_id, (product_id, ))
         data = cursor.fetchone()
@@ -76,7 +76,7 @@ async def search_product(product_id: str):
 @router.get("/product/name/{product_name}", tags=['Produtos'])
 async def search_product(product_name: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         search = str("%" + product_name + "%")
 
@@ -111,7 +111,7 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
         'model': model
     }
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("INSERT INTO product (id, seller_id, name, brand_id, category_id, stock, warranty, active, featured, model) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                        (product['id'], user['seller_id'], product['name'], product['brand_id'], product['category_id'], product['stock'], product['warranty'], product['active'], product['featured'], product['model']))
@@ -155,7 +155,7 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
 @router.delete('/product/{id_product}', tags=['Produtos'])
 async def delete_product(id_product: str, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(
             "SELECT image.path FROM image WHERE image.id_product LIKE %s", (
@@ -180,7 +180,7 @@ async def delete_product(id_product: str, current_user: int = Depends(token.get_
 @router.delete('/product', tags=['Produtos'])
 async def delete_product(id_product: str = Form()):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(
             "SELECT image.path FROM image WHERE image.id_product LIKE %s", (
@@ -203,7 +203,7 @@ async def delete_product(id_product: str = Form()):
 @router.put('/product', tags=['Produtos'])
 async def update_product(product: update_product_model, user=Depends(token.get_current_seller)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute('UPDATE product SET name = %s, brand_id = %s, category_id = %s, stock = %s, warranty = %s, active = %s, model = %s, featured = %s where id = %s and seller_id = %s',
                        (product.name, product.brand, product.category, product.stock, product.warranty, product.active, product.model, product.featured, product.id, user['seller_id']))
         mysql_connection.commit()
@@ -220,7 +220,7 @@ async def update_product(product: update_product_model, user=Depends(token.get_c
 @router.delete("/product/image", tags=["Produtos"])
 async def delete_image(id_image: str = Form()):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("DELETE FROM IMAGE WHERE id = %s", (id_image,))
         mysql_connection.commit()
         return True
@@ -234,7 +234,7 @@ async def delete_image(id_image: str = Form()):
 @router.post("/product/image", tags=["Produtos"])
 async def upload_images(id_product: str = Form(), files: List[UploadFile] = File()):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         filenames = []
 
         for file in files:
@@ -266,7 +266,7 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
                    'FILES_TO_KEEP': indexed_files
                    }
 
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         # Exclusão das imagens
         for filename in files_to_delete:
@@ -312,7 +312,7 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
 @router.post("/product/description", tags=["Produtos"])
 async def create_description(description: new_description):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(
             "INSERT INTO description_product (id_product, description_html) values (%s, %s)", (description.id_product, description.description))
@@ -328,7 +328,7 @@ async def create_description(description: new_description):
 @router.patch("/product/description", tags=["Produtos"])
 async def create_description(description: new_description):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(
             "UPDATE description_product SET description_html = %s WHERE id_product = %s", (description.description, description.id_product))
@@ -344,7 +344,7 @@ async def create_description(description: new_description):
 @router.delete("/product/description", tags=["Produtos"])
 async def delete_description(id_product: str = Form()):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "DELETE FROM description_product WHERE id_product = %s", (id_product))
         mysql_connection.commit()
@@ -359,7 +359,7 @@ async def delete_description(id_product: str = Form()):
 @router.get("/product/brand/{brand_id}", tags=['Produtos', 'Marca'])
 async def get_products_specif_brand(brand_id: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             get_limit_products_specific_brand, (brand_id, 40)
         )
@@ -382,10 +382,11 @@ async def get_products_specif_brand(brand_id: str):
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/product/category/{category_id}", tags=['Produtos', 'Categoria'])
 async def get_products_specif_brand(category_id: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             get_limit_products_specific_category, (category_id, 40)
         )

@@ -16,7 +16,7 @@ router = APIRouter()
 @router.get("/purchase-orders", tags=['Pedidos'])
 async def get_limited_products(current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(select_purchase_order, (current_user,))
         data = cursor.fetchone()
@@ -41,7 +41,7 @@ async def get_limited_products(current_user: int = Depends(token.get_current_use
 @router.get("/purchase-orders/{id}", tags=['Pedidos'])
 async def get_limited_products(id: str, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute(select_purchase_order_id, (id,))
         data = cursor.fetchone()
@@ -72,7 +72,7 @@ def generate_id():
 @router.post("/purchase-orders", tags=['Pedidos'])
 async def post_purchase_order(purchase: purchase_order, current_user: int = Depends(token.get_current_user)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(select_data_order,
                        (current_user,))
         data = cursor.fetchone()

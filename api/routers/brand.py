@@ -14,8 +14,8 @@ os.makedirs(upload_folder, exist_ok=True)
 @router.get("/brand", tags=["Marca"])
 async def get_brands():
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM BRAND")
+        cursor = mysql_connection.cursor()
+        cursor.execute("SELECT * FROM brand")
         inserted_data = cursor.fetchall()
         cursor.close()
         return inserted_data
@@ -29,7 +29,7 @@ async def get_brands():
 @router.post("/brand", tags=['Marca'])
 async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 30)
 
@@ -89,7 +89,7 @@ async def create_brand(name: str = Form(), brand_logo: UploadFile = File(None), 
 @router.patch("/brand", tags=["Marca"])
 async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: UploadFile = File(None), brand_logo_black: UploadFile = File(None), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM BRAND WHERE id = %s", (id,))
         old_brand = cursor.fetchone()
@@ -151,7 +151,7 @@ async def update_brand(id: str = Form(), name: str = Form(None), brand_logo: Upl
 @router.put("/brand", tags=["Marca"])
 async def update_brand(id: str = Form(), name: str = Form(), brand_logo: UploadFile = File(), brand_logo_black: UploadFile = File()):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM BRAND WHERE id = %s", (id,))
         old_brand = cursor.fetchone()
@@ -195,11 +195,11 @@ async def update_brand(id: str = Form(), name: str = Form(), brand_logo: UploadF
 @router.delete("/brand/{id}", tags=["Marca"])
 async def delete_brand(id: str, current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM BRAND WHERE id = %s", (id,))
+        cursor = mysql_connection.cursor()
+        cursor.execute("SELECT * FROM brand WHERE id = %s", (id,))
         data = cursor.fetchone()
 
-        cursor.execute("DELETE FROM BRAND WHERE id LIKE %s", (id,))
+        cursor.execute("DELETE FROM brand WHERE id LIKE %s", (id,))
 
         if data['brand_logo'] is not None:
             filename_logo = os.path.join(

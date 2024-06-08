@@ -1,9 +1,10 @@
 from database.connection import mysql_connection
 import json
 
+
 async def calc_list_portions(array_cart: dict, id_person: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute(
             "DELETE FROM portion WHERE id_cart_user = %s", (id_person,))
         mysql_connection.commit()

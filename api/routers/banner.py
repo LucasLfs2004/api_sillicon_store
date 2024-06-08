@@ -14,7 +14,7 @@ os.makedirs(upload_folder, exist_ok=True)
 @router.get("/banner", tags=["Admin", "Banner"])
 async def get_banners():
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("SELECT * FROM banner where active = 1")
         inserted_data = cursor.fetchall()
 
@@ -29,7 +29,7 @@ async def get_banners():
 @router.get("/banner/all", tags=["Admin", "Banner"])
 async def get_banners():
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("SELECT * FROM banner")
         inserted_data = cursor.fetchall()
 
@@ -46,7 +46,7 @@ async def get_banners():
 @router.post("/banner", tags=['Admin', 'Banner'])
 async def create_banner(link_redirect: str = Form(), image_web: UploadFile = File(), image_mobile: UploadFile = File(), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         id = int.from_bytes(
             uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 30)
 
@@ -81,7 +81,7 @@ async def create_banner(link_redirect: str = Form(), image_web: UploadFile = Fil
 @ router.patch("/banner", tags=["Admin", "Banner"])
 async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_web: UploadFile = File(None), image_mobile: UploadFile = File(None), active: str = Form(None), current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT * FROM banner WHERE id = %s", (id,))
         old_banner = cursor.fetchone()
@@ -144,7 +144,7 @@ async def update_brand(id: str = Form(), link_redirect: str = Form(None), image_
 @ router.patch("/banner/active", tags=["Admin", "Banner"])
 async def handle_active_banner(id: str):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
 
         cursor.execute("SELECT active FROM banner WHERE id = %s", (id,))
         banner_data = cursor.fetchone()
@@ -169,7 +169,7 @@ async def handle_active_banner(id: str):
 @ router.delete("/banner/{id}", tags=["Admin", "Banner"])
 async def delete_banner(id: str, current_user: int = Depends(token.is_admin)):
     try:
-        cursor = mysql_connection.cursor(dictionary=True)
+        cursor = mysql_connection.cursor()
         cursor.execute("SELECT * FROM banner WHERE id = %s", (id,))
         data = cursor.fetchone()
 
