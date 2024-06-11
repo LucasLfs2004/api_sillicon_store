@@ -273,14 +273,14 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
 
         # Exclusão das imagens
         for filename in files_to_delete:
-            cursor.execute("SELECT * FROM IMAGE WHERE path = %s", (filename,))
+            cursor.execute("SELECT * FROM image WHERE path = %s", (filename,))
             filename_db = cursor.fetchone()
             print(filename_db)
 
             if filename_db is not None:
                 print(filename_db)
-                # cursor.execute("DELETE FROM image WHERE id = %s",
-                #                (filename_db['id'],))
+                cursor.execute(
+                    "DELETE FROM image WHERE path = %s", (filename,))
                 print('realizei o delete')
                 print(filename)
                 path = str(upload_folder + "/" + filename)
