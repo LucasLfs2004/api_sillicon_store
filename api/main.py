@@ -60,7 +60,8 @@ def read_root():
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
-        cursor.execute(get_person_id_query, (form_data.username.strip().lower(),))
+        cursor.execute(get_person_id_query,
+                       (form_data.username.strip().lower(),))
         person = cursor.fetchone()
 
         if person is None:
@@ -79,6 +80,7 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 def shutdown():
     print("Encerrando a aplicação...")

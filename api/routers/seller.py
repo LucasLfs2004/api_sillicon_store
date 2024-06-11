@@ -9,6 +9,7 @@ import uuid
 
 router = APIRouter()
 
+
 @router.get("/seller/me", tags=['Vendedor'])
 async def get_data_user(current_user: int = Depends(token.get_current_user)):
     try:
@@ -19,13 +20,16 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         data = json.loads(profile_data['seller'])
 
         for product in data['products_from_seller']:
-            images = organize_images_from_products(product=product)
-            product['images'] = images
+            # print(product)
+            if product['images'] is not None:
+                images = organize_images_from_products(product=product)
+                product['images'] = images
         return data
 
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.patch("/seller/product/offer", tags=['Vendedor'])
 async def change_value_product(infos: offer_product, current_user: int = Depends(token.get_current_seller)):
@@ -39,6 +43,7 @@ async def change_value_product(infos: offer_product, current_user: int = Depends
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/seller/product/description", tags=['Vendedor'])
 async def set_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):
@@ -56,6 +61,7 @@ async def set_description_product(description: description_product, current_user
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.patch("/seller/product/description", tags=['Vendedor'])
 async def patch_description_product(description: description_product, current_user: int = Depends(token.get_current_seller)):

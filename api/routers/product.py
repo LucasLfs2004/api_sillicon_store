@@ -267,6 +267,7 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
                    'FILES_TO_DELETE': files_to_delete,
                    'FILES_TO_KEEP': indexed_files
                    }
+        print(entrada)
 
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -274,14 +275,18 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
         for filename in files_to_delete:
             cursor.execute("SELECT * FROM IMAGE WHERE path = %s", (filename,))
             filename_db = cursor.fetchone()
+            print(filename_db)
 
             if filename_db is not None:
-                cursor.execute(
-                    "DELETE FROM image WHERE image.path = %s", (filename,))
-                mysql_connection.commit()
-
+                print(filename_db)
+                # cursor.execute("DELETE FROM image WHERE id = %s",
+                #                (filename_db['id'],))
+                print('realizei o delete')
+                print(filename)
+                path = str(upload_folder + "/" + filename)
                 filename_img = os.path.join(upload_folder + "/" + filename)
-                os.remove(filename_img)
+                print(filename_img)
+                os.remove(path)
 
         ##########################
         mysql_connection.commit()
@@ -289,18 +294,21 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
         # Inserção de novas imagens no Banco
         filenames = []
         for file in new_files:
+            print(file)
             filename = str(time.time()) + file.filename.replace(' ', '_')
             filenames.append(filename)
             file_path = os.path.join(upload_folder, filename)
             with open(file_path, "wb") as f:
                 f.write(file.file.read())
+            print(file_path)
             cursor.execute(
                 "INSERT INTO image (id, id_product, path) VALUES (%s, %s, %s)",
                 (str(uuid.uuid4()), id_product, filename)
             )
+            mysql_connection.commit()
         ##########################
 
-        mysql_connection.commit()
+        # mysql_connection.commit()
         for index, item in enumerate(indexed_files):
             cursor.execute(
                 'UPDATE image SET index_image = %s WHERE path = %s', (index, item))
@@ -308,6 +316,7 @@ async def upload_images(id_product: str = Form(), new_files: List[UploadFile] = 
         return True
     except Exception as e:
         mysql_connection.rollback()
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 
