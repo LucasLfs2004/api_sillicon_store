@@ -107,7 +107,7 @@ SELECT JSON_OBJECT(
             )
         ), 'ship', (
             SELECT JSON_OBJECT(
-                    'district', district, 'city', cidade, 'state', estado, 'receiver_name', receiver, 'street', street, 'cep', cep, 'complement', complement, 'ship_number', number, 'phone_number', phone_number
+                    'district', district, 'city', cidade, 'state', estado, 'receiver_name', ship_info.receiver, 'street', street, 'cep', cep, 'complement', complement, 'ship_number', number, 'phone_number', phone_number
                 )
             FROM ship_info
             WHERE

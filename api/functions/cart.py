@@ -1,6 +1,7 @@
 from database.connection import mysql_connection
 import json
 
+
 async def calc_list_portions(array_cart: dict, id_person: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
@@ -52,11 +53,15 @@ async def organize_response_cart(cart: dict, id_person: str):
     array_cart = json.loads(cart["cart"])
 
     for item in array_cart['items']:
-        item['images'] = sorted(item['images'])
+        if item['images'] is not None:
+            item['images'] = sorted(item['images'])
+        else:
+            array_cart['items'] = None
 
-    # Se precisar ordenar a lista de itens pelo nome do produto:
-    array_cart['items'] = sorted(
-        array_cart['items'], key=lambda x: x['name'])
+    if array_cart['items'] is not None:
+        # Se precisar ordenar a lista de itens pelo nome do produto:
+        array_cart['items'] = sorted(
+            array_cart['items'], key=lambda x: x['name'])
 
     array_cart['list_portions'] = await calc_list_portions(array_cart=array_cart, id_person=id_person)
 

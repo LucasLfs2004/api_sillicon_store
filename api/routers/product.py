@@ -110,6 +110,7 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
         'warranty': warranty,
         'model': model
     }
+    print(product)
     try:
         cursor = mysql_connection.cursor(dictionary=True)
 
@@ -146,6 +147,7 @@ async def create_product(name: str = Form(), brand_id: str = Form(), category_id
         cursor.close()
         return True
     except Exception as e:
+        print(e)
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
     finally:

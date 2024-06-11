@@ -19,7 +19,8 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         cart = cursor.fetchone()
         cursor.close()
 
-        cart = await organize_response_cart(cart=cart, id_person=current_user)
+        if cart is not None:
+            cart = await organize_response_cart(cart=cart, id_person=current_user)
 
         return cart
 

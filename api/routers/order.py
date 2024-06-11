@@ -72,12 +72,16 @@ def generate_id():
 @router.post("/purchase-orders", tags=['Pedidos'])
 async def post_purchase_order(purchase: purchase_order, current_user: int = Depends(token.get_current_user)):
     try:
+        print(purchase)
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(select_data_order,
                        (current_user,))
         data = cursor.fetchone()
+
+        # print(data)
         order = json.loads(data['cart'])
 
+        print(order)
         order_total_value = order['cart_total_value']
         portion_value = 0
 
@@ -90,8 +94,9 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
             portion_value = float(data_portion['value_portion'])
 
         cursor.execute(insert_purchase_order,
-                       (id_order, current_user, 'completed', order_total_value, purchase.payment_method, portion_value, purchase.often, order['ship']['street'], order['ship']['city'], order['ship']['cep'], order['ship']['state'], order['ship']['ship_number'], order['ship']['complement'], order['discount_value'], order['ship_value'], order['receiver']['receiver_name']))
+                       (id_order, current_user, 'completed', order_total_value, purchase.payment_method, portion_value, purchase.often, order['ship']['street'], order['ship']['city'], order['ship']['cep'], order['ship']['state'], order['ship']['ship_number'], order['ship']['complement'], order['discount_value'], order['ship_value'], order['ship']['receiver_name']))
         mysql_connection.commit()
+        print('sai do insert_purchase_order')
 
         for item in order['items']:
             value_product = 0
@@ -108,6 +113,7 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
                            (generate_id(), id_order, item['product_id'], item['amount'], value_product))
             mysql_connection.commit()
 
+        print('select purchase order id')
         cursor.execute(select_purchase_order_id, (id_order,))
         data = cursor.fetchone()
         data = json.loads(data['purchases'])
@@ -119,6 +125,7 @@ async def post_purchase_order(purchase: purchase_order, current_user: int = Depe
 
     except Exception as e:
         mysql_connection.rollback()
+        print('um erro aconteceu')
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
     finally:

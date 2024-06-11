@@ -32,7 +32,8 @@ def post_comment(comment: new_comment):
 
         cursor.execute(
             "INSERT INTO comment (id_comment, id_product, title_text, comment_text, rating_value, id_order_item ) VALUES (%s, %s, %s, %s, %s, %s)",
-            (id, comment.id_product, comment.title, comment.comment, comment.rating, comment.id_order_item)
+            (id, comment.id_product, comment.title,
+             comment.comment, comment.rating, comment.id_order_item)
         )
 
         mysql_connection.commit()
@@ -47,8 +48,8 @@ def post_comment(comment: new_comment):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/comment", tags=["Comentários de produto"])
-def delete_comment(id_comment: str = Form()):
+@router.delete("/comment/{id_comment}", tags=["Comentários de produto"])
+def delete_comment(id_comment: str):
     try:
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
