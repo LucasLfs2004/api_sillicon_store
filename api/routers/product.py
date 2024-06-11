@@ -365,11 +365,13 @@ async def get_products_specif_brand(brand_id: str):
         )
         data = cursor.fetchone()
 
-        data = json.loads(data['products'])
-
-        for product in data:
-            images = organize_images_from_products(product=product)
-            product['images'] = images
+        if data['products'] is not None:
+            data = json.loads(data['products'])
+            for product in data:
+                images = organize_images_from_products(product=product)
+                product['images'] = images
+        else:
+            data = None
 
         cursor.execute(
             "select name as brand_name, brand_logo, brand_logo_black from brand where id = %s", (brand_id,))
@@ -382,6 +384,7 @@ async def get_products_specif_brand(brand_id: str):
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/product/category/{category_id}", tags=['Produtos', 'Categoria'])
 async def get_products_specif_brand(category_id: str):
     try:
@@ -391,11 +394,13 @@ async def get_products_specif_brand(category_id: str):
         )
         data = cursor.fetchone()
 
-        data = json.loads(data['products'])
-
-        for product in data:
-            images = organize_images_from_products(product=product)
-            product['images'] = images
+        if data['products'] is not None:
+            data = json.loads(data['products'])
+            for product in data:
+                images = organize_images_from_products(product=product)
+                product['images'] = images
+        else:
+            data = None
 
         cursor.execute(
             "select name from category where id = %s", (category_id,))
