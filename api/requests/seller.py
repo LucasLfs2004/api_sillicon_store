@@ -3,7 +3,7 @@ select JSON_OBJECT(
         'store_name', s.store_name, 'id_seller', s.id, 'products_from_seller', (
             SELECT JSON_ARRAYAGG(
                     JSON_OBJECT(
-                        'id', product.id, 'name', product.name, 'stock', product.stock, 'warranty', product.warranty, 'model', product.model, 'featured', product.featured, 'active', product.active, 'category', category.name, 'brand', JSON_OBJECT(
+                        'id', product.id, 'name', product.name, 'stock', product.stock, 'warranty', product.warranty, 'model', product.model, 'featured', product.featured, 'active', product.active, 'category', category.name, 'sold_amount', product.sold_amount, 'brand', JSON_OBJECT(
                             'name', brand.name, 'logo', brand.brand_logo, 'logo_black', brand.brand_logo_black
                         ), 'images', (
                             Select JSON_ARRAYAGG(
