@@ -7,7 +7,7 @@ from typing import List
 from database.connection import mysql_connection
 from dependencies import token
 from models.product import update_product_model, new_description
-from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand, get_limit_products_specific_category
+from requests.product import get_all_products, get_product_id, search_product_name, get_limit_products, get_limit_products_specific_brand, get_limit_products_specific_category, get_products_with_offers
 from functions.product import organize_images_from_products
 
 router = APIRouter()
@@ -93,11 +93,35 @@ async def search_product(product_name: str):
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/product/offers/{limit}", tags=['Produtos'])
+async def get_products_offers(limit: int):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+
+        cursor.execute(get_products_with_offers, (limit,))
+        data = cursor.fetchone()
+        data = json.loads(data['products'])
+
+        print(data)
+
+        for product in data:
+            images = organize_images_from_products(product=product)
+            product['images'] = images
+
+        return data
+    except Exception as e:
+        print(e)
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+
 
 
 @router.post("/product", tags=['Produtos'])
 async def create_product(name: str = Form(), brand_id: str = Form(), category_id: str = Form(),
-                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(), fees_credit: str = Form(), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...), user=Depends(token.get_current_seller)):
+                         price: str = Form(), portions: str = Form(), fees_monthly: str = Form(None), fees_credit: str = Form(None), stock: str = Form(), featured: str = Form(), warranty: str = Form(), model: str = Form(None), description: str = Form(None), files: List[UploadFile] = File(...), user=Depends(token.get_current_seller)):
     filenames = []
     product = {
         'id': int.from_bytes(uuid.uuid4().bytes[:4], byteorder="big") % (2 ** 32),
