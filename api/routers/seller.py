@@ -20,7 +20,6 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
         data = json.loads(profile_data['seller'])
 
         for product in data['products_from_seller']:
-            # print(product)
             if product['images'] is not None:
                 images = organize_images_from_products(product=product)
                 product['images'] = images

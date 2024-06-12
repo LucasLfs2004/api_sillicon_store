@@ -1,7 +1,6 @@
 def organize_images_from_products(product):
     images = []
-
-    print(product)
+    
     swapped = False
     length_arr = len(product['images'])
     if len(product['images']) > 1:
