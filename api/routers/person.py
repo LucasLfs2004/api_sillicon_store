@@ -47,7 +47,6 @@ async def get_data_user(current_user: int = Depends(token.get_current_user)):
 @router.post("/login", tags=['User'])
 async def login_user(login: effect_login):
     try:
-
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(get_person_id_query, (login.email.strip().lower(),))
         person = cursor.fetchone()
@@ -66,6 +65,7 @@ async def login_user(login: effect_login):
         else:
             raise HTTPException(status_code=401, detail="Senha incorreta")
     except Exception as e:
+        print(e)
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
