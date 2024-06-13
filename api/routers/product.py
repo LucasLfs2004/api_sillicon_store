@@ -93,7 +93,8 @@ async def search_product(product_name: str):
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 @router.get("/product/offers/{limit}", tags=['Produtos'])
 async def get_products_offers(limit: int):
     try:
@@ -102,8 +103,6 @@ async def get_products_offers(limit: int):
         cursor.execute(get_products_with_offers, (limit,))
         data = cursor.fetchone()
         data = json.loads(data['products'])
-
-        print(data)
 
         for product in data:
             images = organize_images_from_products(product=product)
@@ -116,7 +115,6 @@ async def get_products_offers(limit: int):
         raise HTTPException(status_code=500, detail=str(e))
     finally:
         cursor.close()
-
 
 
 @router.post("/product", tags=['Produtos'])

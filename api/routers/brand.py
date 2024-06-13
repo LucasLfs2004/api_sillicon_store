@@ -18,7 +18,10 @@ async def get_brands():
         cursor.execute("SELECT * FROM BRAND")
         inserted_data = cursor.fetchall()
         cursor.close()
-        return inserted_data
+        brand = sorted(
+            inserted_data, key=lambda x: x['name'])
+        print(brand)
+        return brand
     except Exception as e:
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))

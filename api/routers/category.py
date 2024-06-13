@@ -18,6 +18,8 @@ async def get_categorys():
         cursor.execute("SELECT * FROM category")
         categorys = cursor.fetchall()
 
+        categorys = sorted(
+            categorys, key=lambda x: x['name'])
         cursor.close()
         return categorys
     except Exception as e:
