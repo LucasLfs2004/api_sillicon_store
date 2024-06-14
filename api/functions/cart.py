@@ -1,6 +1,13 @@
 from database.connection import mysql_connection
 import json
+from requests.cart import select_data_for_update_cart_user
+from fastapi import HTTPException
+from decimal import Decimal, ROUND_DOWN
 
+def round_value(value):
+    decimal_value = Decimal(str(value))
+    decimal_value = decimal_value.quantize(Decimal('0.00'), rounding=ROUND_DOWN)
+    return float(decimal_value)
 
 async def calc_list_portions(array_cart: dict, id_person: str):
     try:
@@ -78,3 +85,29 @@ def calc_portion_value(fees_monthly: float, fees_credit: float, price: float, of
     except Exception as e:
         print(e)
         return None
+
+async def update_cart_user(id: str):
+    try:
+        cursor = mysql_connection.cursor(dictionary=True)
+        cursor.execute(select_data_for_update_cart_user, (id,))
+        data = cursor.fetchone()
+        data = json.loads(data['data_cart'])
+        discount_value_cart = 0
+
+        if data['discount'] < 1 and data['discount'] > 0:
+            discount_value_cart = data['cart_value'] * data['discount']
+        elif data['discount'] >= 1:
+            discount_value_cart = data['discount']
+        
+        cart_total_value = data['cart_value'] - discount_value_cart + data['ship_value']
+        discount_value_cart = round_value(discount_value_cart)
+        cart_total_value = round_value(cart_total_value)
+        
+        cursor.execute('UPDATE cart_user SET discount = %s, discount_value = %s, cart_total_value = %s WHERE id_person = %s', 
+                       (data['discount'], discount_value_cart, cart_total_value ,id))
+    except Exception as e:
+        mysql_connection.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        mysql_connection.commit()
+        cursor.close()

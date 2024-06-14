@@ -4,7 +4,7 @@ from database.connection import mysql_connection
 from models.models import new_cart, update_cart, apply_discount, new_cart_item
 from dependencies import token
 from requests.cart import select_complete_cart
-from functions.cart import organize_response_cart
+from functions.cart import organize_response_cart, update_cart_user
 from models.cart import ship_cart, ship_cart_id
 
 router = APIRouter()
@@ -181,13 +181,13 @@ async def apply_discount_in_cart(code: apply_discount, current_user: int = Depen
             cursor.execute('UPDATE cart_user SET voucher = %s WHERE id_person = %s',
                            (code.code, current_user))
             mysql_connection.commit()
-            cursor.execute('CALL atualizar_cart_user(%s)',
-                           (current_user,))
+            await update_cart_user(current_user)
             mysql_connection.commit()
 
         return True
 
     except Exception as e:
+        print(e)
         mysql_connection.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -198,8 +198,7 @@ async def clear_voucher_discount(current_user: int = Depends(token.get_current_u
         cursor = mysql_connection.cursor(dictionary=True)
         cursor.execute(
             'UPDATE cart_user SET voucher = NULL WHERE id_person = %s', (current_user,))
-        cursor.execute('CALL atualizar_cart_user(%s)',
-                       (current_user,))
+        await update_cart_user(current_user)
         mysql_connection.commit()
 
         # Realizar consulta para obter os dados inseridos
@@ -223,8 +222,7 @@ async def set_ship_cart(ship: ship_cart, current_user: int = Depends(token.get_c
         mysql_connection.commit()
 
         # Chamada da procedure
-        cursor.execute('CALL atualizar_cart_user(%s)',
-                       (current_user,))
+        await update_cart_user(current_user)
         mysql_connection.commit()
         return True
     except Exception as e:
@@ -249,8 +247,7 @@ async def set_ship_cart_id(ship: ship_cart_id, current_user: int = Depends(token
         mysql_connection.commit()
 
         # Chamada da procedure
-        cursor.execute('CALL atualizar_cart_user(%s)',
-                       (current_user,))
+        await update_cart_user(current_user)
         mysql_connection.commit()
         return True
     except Exception as e:

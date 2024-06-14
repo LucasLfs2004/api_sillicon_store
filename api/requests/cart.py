@@ -23,3 +23,12 @@ FROM
 WHERE
     cart.id_person = %s
 """
+
+
+select_data_for_update_cart_user = """
+SELECT JSON_OBJECT('cart_value', (IFNULL(cart_user.product_total_value, 0)), 'ship_value', (IFNULL(cart_user.ship_value, 0)), 'discount', IFNULL(discount_list.discount, 0)) AS data_cart
+FROM cart_user
+LEFT JOIN discount_list on cart_user.voucher = discount_list.code
+WHERE
+    id_person = %s;
+"""
